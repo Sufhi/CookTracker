@@ -51,9 +51,7 @@ struct CookingTimerView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("閉じる") {
-                        if timer.isRunning {
-                            timer.stopTimer()
-                        }
+                        // タイマーは継続したまま画面を閉じる
                         dismiss()
                     }
                 }
