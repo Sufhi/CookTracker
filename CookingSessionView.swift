@@ -11,6 +11,7 @@ struct CookingSessionView: View {
     let recipe: SampleRecipe
     @ObservedObject var cookingSession: CookingSessionTimer
     let onCookingComplete: (CookingSessionRecord) -> Void
+    var helperTimer: CookingTimer?
     
     @Environment(\.dismiss) private var dismiss
     @State private var isShowingHelperTimer = false
@@ -51,7 +52,11 @@ struct CookingSessionView: View {
                 }
             }
             .sheet(isPresented: $isShowingHelperTimer) {
-                CookingTimerView()
+                if let helperTimer = helperTimer {
+                    CookingTimerView(timer: helperTimer)
+                } else {
+                    CookingTimerView(timer: CookingTimer())
+                }
             }
             .alert("調理を完了しますか？", isPresented: $isShowingFinishConfirmation) {
                 Button("完了", role: .destructive) {
@@ -303,7 +308,8 @@ struct CookingSessionView_Previews: PreviewProvider {
                 estimatedTime: 20,
                 createdAt: Date()
             ),
-            cookingSession: CookingSessionTimer()
+            cookingSession: CookingSessionTimer(),
+            helperTimer: CookingTimer()
         ) { record in
             print("完了: \(record.formattedActualTime)")
         }

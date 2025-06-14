@@ -8,7 +8,7 @@ import SwiftUI
 struct CookingTimerView: View {
     
     // MARK: - Properties
-    @StateObject private var timer = CookingTimer()
+    @ObservedObject var timer: CookingTimer
     @Environment(\.dismiss) private var dismiss
     @State private var selectedMinutes = 10
     @State private var showingTimePicker = false
@@ -364,6 +364,6 @@ struct TimerCompletionView: View {
 // MARK: - Preview
 struct CookingTimerView_Previews: PreviewProvider {
     static var previews: some View {
-        CookingTimerView()
+        CookingTimerView(timer: CookingTimer())
     }
 }

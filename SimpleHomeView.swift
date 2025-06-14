@@ -11,6 +11,7 @@ struct SimpleHomeView: View {
     @State private var isShowingTimer = false
     @State private var isShowingCookingSession = false
     @StateObject private var cookingSession = CookingSessionTimer()
+    @StateObject private var helperTimer = CookingTimer()
     
     // 静的なデータ（後でCore Dataに置き換え）
     private let currentLevel = 3
@@ -46,19 +47,28 @@ struct SimpleHomeView: View {
     // MARK: - Body
     var body: some View {
         VStack(spacing: 0) {
-            // 調理セッション中カード（固定表示）
-            if cookingSession.isRunning || cookingSession.isPaused {
-                VStack {
+            // 固定表示エリア
+            VStack(spacing: 8) {
+                // 調理セッション中カード（固定表示）
+                if cookingSession.isRunning || cookingSession.isPaused {
                     cookingSessionActiveCard
                         .padding(.horizontal)
                         .padding(.top, 8)
-                        .padding(.bottom, 4)
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                        .animation(.easeInOut(duration: 0.3), value: cookingSession.isRunning)
                 }
-                .background(Color(.systemGroupedBackground))
-                .shadow(color: .black.opacity(0.1), radius: 3, x: 0, y: 2)
-                .transition(.move(edge: .top).combined(with: .opacity))
-                .animation(.easeInOut(duration: 0.3), value: cookingSession.isRunning)
+                
+                // 補助タイマーカード（コンパクト表示）
+                if helperTimer.isRunning || (helperTimer.timeRemaining > 0 && !helperTimer.isRunning) {
+                    helperTimerCompactCard
+                        .padding(.horizontal)
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                        .animation(.easeInOut(duration: 0.3), value: helperTimer.isRunning)
+                }
             }
+            .background(Color(.systemGroupedBackground))
+            .shadow(color: .black.opacity(0.1), radius: 3, x: 0, y: 2)
+            .padding(.bottom, (cookingSession.isRunning || cookingSession.isPaused || helperTimer.isRunning || helperTimer.timeRemaining > 0) ? 4 : 0)
             
             // スクロール可能なメインコンテンツ
             ScrollView {
@@ -86,12 +96,13 @@ struct SimpleHomeView: View {
             AddRecipeSheetView()
         }
         .sheet(isPresented: $isShowingTimer) {
-            CookingTimerView()
+            CookingTimerView(timer: helperTimer)
         }
         .sheet(isPresented: $isShowingCookingSession) {
             CookingSessionView(
                 recipe: suggestedRecipe,
-                cookingSession: cookingSession
+                cookingSession: cookingSession,
+                helperTimer: helperTimer
             ) { record in
                 // 将来: Core Dataに保存
                 print("✅ おすすめレシピ調理完了: \(record.formattedActualTime)")
@@ -489,6 +500,83 @@ struct SimpleHomeView: View {
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
                         .stroke(Color.orange.opacity(0.4), lineWidth: 1.5)
+                )
+        )
+    }
+    
+    @ViewBuilder
+    private var helperTimerCompactCard: some View {
+        HStack(spacing: 12) {
+            // タイマーアイコンと状態
+            HStack(spacing: 6) {
+                Image(systemName: "timer")
+                    .foregroundColor(.blue)
+                    .font(.system(size: 16))
+                
+                Text("補助タイマー")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundColor(.blue)
+            }
+            
+            Spacer()
+            
+            // 時間表示
+            Text(helperTimer.formattedTime)
+                .font(.system(size: 16, weight: .semibold, design: .monospaced))
+                .foregroundColor(.blue)
+            
+            // 状態インジケーター
+            Circle()
+                .fill(helperTimer.isRunning ? .green : .orange)
+                .frame(width: 8, height: 8)
+            
+            // 操作ボタン
+            HStack(spacing: 8) {
+                // 一時停止/再開ボタン
+                Button(action: {
+                    if helperTimer.isRunning {
+                        helperTimer.pauseTimer()
+                    } else if helperTimer.timeRemaining > 0 {
+                        helperTimer.resumeTimer()
+                    }
+                }) {
+                    Image(systemName: helperTimer.isRunning ? "pause.fill" : "play.fill")
+                        .font(.system(size: 14))
+                        .foregroundColor(.blue)
+                        .frame(width: 24, height: 24)
+                        .background(
+                            Circle()
+                                .fill(Color.blue.opacity(0.1))
+                        )
+                }
+                .buttonStyle(.plain)
+                .disabled(helperTimer.timeRemaining == 0)
+                
+                // タイマー画面を開くボタン
+                Button(action: {
+                    isShowingTimer = true
+                }) {
+                    Image(systemName: "arrow.up.right.square")
+                        .font(.system(size: 14))
+                        .foregroundColor(.blue)
+                        .frame(width: 24, height: 24)
+                        .background(
+                            Circle()
+                                .fill(Color.blue.opacity(0.1))
+                        )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.blue.opacity(0.05))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.blue.opacity(0.3), lineWidth: 1)
                 )
         )
     }
