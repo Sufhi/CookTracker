@@ -299,6 +299,9 @@ struct AddRecipeView: View {
 struct RecipeDetailView: View {
     let recipe: SampleRecipe
     @Environment(\.dismiss) private var dismiss
+    @StateObject private var cookingSession = CookingSessionTimer()
+    @State private var isShowingCookingView = false
+    @State private var completedRecord: CookingSessionRecord?
     
     var body: some View {
         NavigationView {
@@ -365,13 +368,25 @@ struct RecipeDetailView: View {
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("調理開始") {
-                        // タイマー画面への遷移は後で実装
-                        dismiss()
+                    Button(cookingSession.isRunning ? "調理中" : "調理開始") {
+                        if !cookingSession.isRunning {
+                            isShowingCookingView = true
+                        }
                     }
                     .buttonStyle(.borderedProminent)
                     .controlSize(.small)
-                    .tint(.brown)
+                    .tint(cookingSession.isRunning ? .orange : .brown)
+                    .disabled(cookingSession.isRunning)
+                }
+            }
+            .sheet(isPresented: $isShowingCookingView) {
+                CookingSessionView(
+                    recipe: recipe,
+                    cookingSession: cookingSession
+                ) { record in
+                    completedRecord = record
+                    // 将来: Core Dataに保存
+                    print("✅ 調理記録保存: \(record.formattedActualTime)")
                 }
             }
         }

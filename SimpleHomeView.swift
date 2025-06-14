@@ -9,12 +9,39 @@ struct SimpleHomeView: View {
     // MARK: - Properties
     @State private var isShowingAddRecipe = false
     @State private var isShowingTimer = false
+    @State private var isShowingCookingSession = false
+    @StateObject private var cookingSession = CookingSessionTimer()
     
     // 静的なデータ（後でCore Dataに置き換え）
     private let currentLevel = 3
     private let currentExperience = 150
     private let experienceToNextLevel = 150
     private let progressToNextLevel = 0.5
+    
+    // おすすめレシピのサンプルデータ
+    private let suggestedRecipe = SampleRecipe(
+        id: UUID(),
+        title: "簡単オムライス",
+        ingredients: "卵 2個\nご飯 200g\nケチャップ 大さじ2\n玉ねぎ 1/4個\nベーコン 2枚",
+        instructions: "1. 玉ねぎとベーコンを炒める\n2. ご飯を加えてケチャップで味付け\n3. 卵でふわふわに包む",
+        category: "食事",
+        difficulty: 2,
+        estimatedTime: 20,
+        createdAt: Date()
+    )
+    
+    // MARK: - Computed Properties
+    
+    /// 調理セッションボタンのテキスト
+    private var cookingSessionButtonText: String {
+        if cookingSession.isRunning {
+            return "調理中"
+        } else if cookingSession.isPaused {
+            return "調理再開"
+        } else {
+            return "調理セッション開始"
+        }
+    }
     
     // MARK: - Body
     var body: some View {
@@ -41,6 +68,15 @@ struct SimpleHomeView: View {
         }
         .sheet(isPresented: $isShowingTimer) {
             CookingTimerView()
+        }
+        .sheet(isPresented: $isShowingCookingSession) {
+            CookingSessionView(
+                recipe: suggestedRecipe,
+                cookingSession: cookingSession
+            ) { record in
+                // 将来: Core Dataに保存
+                print("✅ おすすめレシピ調理完了: \(record.formattedActualTime)")
+            }
         }
     }
     
@@ -116,27 +152,51 @@ struct SimpleHomeView: View {
             
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("簡単オムライス")
+                    Text(suggestedRecipe.title)
                         .font(.title3)
                         .fontWeight(.medium)
                     
-                    Text("難易度: ⭐⭐")
+                    HStack {
+                        ForEach(0..<suggestedRecipe.difficulty) { _ in
+                            Text("⭐")
+                        }
+                        Text("難易度")
+                    }
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    
+                    Text("予想時間: \(suggestedRecipe.estimatedTime)分")
                         .font(.caption)
                         .foregroundColor(.secondary)
                     
-                    Text("予想時間: 20分")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                    // 調理セッション状態表示
+                    if cookingSession.isRunning || cookingSession.isPaused {
+                        HStack {
+                            Circle()
+                                .fill(cookingSession.isRunning ? .green : .orange)
+                                .frame(width: 8, height: 8)
+                            Text("調理中: \(cookingSession.formattedElapsedTime)")
+                                .font(.caption)
+                                .fontWeight(.medium)
+                                .foregroundColor(cookingSession.isRunning ? .green : .orange)
+                        }
+                    }
                 }
                 
                 Spacer()
                 
-                Button("調理開始") {
-                    isShowingTimer = true
+                Button(cookingSessionButtonText) {
+                    if cookingSession.isRunning || cookingSession.isPaused {
+                        // 調理中の場合は調理セッション画面を開く
+                        isShowingCookingSession = true
+                    } else {
+                        // 新規調理開始
+                        isShowingCookingSession = true
+                    }
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.small)
-                .tint(.brown)
+                .tint(cookingSession.isRunning || cookingSession.isPaused ? .orange : .brown)
             }
             .padding()
             .background(
@@ -189,7 +249,7 @@ struct SimpleHomeView: View {
                             .font(.system(size: 30))
                             .foregroundColor(.brown)
                         
-                        Text("タイマー")
+                        Text("補助タイマー")
                             .font(.caption)
                             .fontWeight(.medium)
                     }
