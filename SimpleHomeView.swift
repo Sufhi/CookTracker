@@ -40,7 +40,7 @@ struct SimpleHomeView: View {
             AddRecipeSheetView()
         }
         .sheet(isPresented: $isShowingTimer) {
-            TimerSheetView()
+            CookingTimerView()
         }
     }
     
@@ -336,41 +336,6 @@ struct AddRecipeSheetView: View {
     }
 }
 
-struct TimerSheetView: View {
-    @Environment(\.dismiss) private var dismiss
-    
-    var body: some View {
-        NavigationView {
-            VStack {
-                Image(systemName: "timer")
-                    .font(.system(size: 60))
-                    .foregroundColor(.brown.opacity(0.5))
-                
-                Text("調理タイマー")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                    .padding(.top)
-                
-                Text("この機能は次のフェーズで実装予定です")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding()
-                
-                Spacer()
-            }
-            .navigationTitle("タイマー")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("閉じる") {
-                        dismiss()
-                    }
-                }
-            }
-        }
-    }
-}
 
 // MARK: - Preview
 struct SimpleHomeView_Previews: PreviewProvider {

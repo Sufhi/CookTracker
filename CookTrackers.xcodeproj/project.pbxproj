@@ -13,6 +13,8 @@
 		70E89D922DFD9CCD00657FFA /* SimpleHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E89D912DFD9CCD00657FFA /* SimpleHomeView.swift */; };
 		70E89D942DFDA3B200657FFA /* RecipeListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E89D932DFDA3B200657FFA /* RecipeListView.swift */; };
 		70E89D972DFDA54400657FFA /* AddRecipeFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E89D962DFDA54400657FFA /* AddRecipeFormView.swift */; };
+		70E89D992DFE2A3500657FFA /* CookingTimerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E89D982DFE2A3500657FFA /* CookingTimerView.swift */; };
+		70E89D9D2DFE2AAB00657FFA /* CookingTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E89D9C2DFE2AAB00657FFA /* CookingTimer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -42,6 +44,8 @@
 		70E89D912DFD9CCD00657FFA /* SimpleHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleHomeView.swift; sourceTree = "<group>"; };
 		70E89D932DFDA3B200657FFA /* RecipeListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeListView.swift; sourceTree = "<group>"; };
 		70E89D962DFDA54400657FFA /* AddRecipeFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddRecipeFormView.swift; sourceTree = "<group>"; };
+		70E89D982DFE2A3500657FFA /* CookingTimerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookingTimerView.swift; sourceTree = "<group>"; };
+		70E89D9C2DFE2AAB00657FFA /* CookingTimer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookingTimer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -81,6 +85,8 @@
 			isa = PBXGroup;
 			children = (
 				70E89D912DFD9CCD00657FFA /* SimpleHomeView.swift */,
+				70E89D982DFE2A3500657FFA /* CookingTimerView.swift */,
+				70E89D9C2DFE2AAB00657FFA /* CookingTimer.swift */,
 				70E89D812DFD984500657FFA /* CookTracker */,
 				70E89D472DFD97FF00657FFA /* Assets.xcassets */,
 				70E89D482DFD97FF00657FFA /* ContentView.swift */,
@@ -244,7 +250,9 @@
 				70E89D4C2DFD97FF00657FFA /* CookTrackersApp.swift in Sources */,
 				70E89D972DFDA54400657FFA /* AddRecipeFormView.swift in Sources */,
 				70E89D942DFDA3B200657FFA /* RecipeListView.swift in Sources */,
+				70E89D9D2DFE2AAB00657FFA /* CookingTimer.swift in Sources */,
 				70E89D922DFD9CCD00657FFA /* SimpleHomeView.swift in Sources */,
+				70E89D992DFE2A3500657FFA /* CookingTimerView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
