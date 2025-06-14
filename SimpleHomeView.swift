@@ -58,8 +58,8 @@ struct SimpleHomeView: View {
                         .animation(.easeInOut(duration: 0.3), value: cookingSession.isRunning)
                 }
                 
-                // 補助タイマーカード（コンパクト表示）
-                if helperTimer.isRunning || (helperTimer.timeRemaining > 0 && !helperTimer.isRunning) {
+                // 補助タイマーカード（動作中のみ表示）
+                if helperTimer.isRunning {
                     helperTimerCompactCard
                         .padding(.horizontal)
                         .transition(.move(edge: .top).combined(with: .opacity))
@@ -68,7 +68,7 @@ struct SimpleHomeView: View {
             }
             .background(Color(.systemGroupedBackground))
             .shadow(color: .black.opacity(0.1), radius: 3, x: 0, y: 2)
-            .padding(.bottom, (cookingSession.isRunning || cookingSession.isPaused || helperTimer.isRunning || helperTimer.timeRemaining > 0) ? 4 : 0)
+            .padding(.bottom, (cookingSession.isRunning || cookingSession.isPaused || helperTimer.isRunning) ? 4 : 0)
             
             // スクロール可能なメインコンテンツ
             ScrollView {

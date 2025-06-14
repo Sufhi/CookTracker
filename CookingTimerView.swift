@@ -205,7 +205,11 @@ struct CookingTimerView: View {
                     return
                 } else if timer.isRunning {
                     timer.pauseTimer()
+                } else if timer.timeRemaining == timer.initialTime {
+                    // 初回開始
+                    timer.startTimer(duration: timer.timeRemaining)
                 } else {
+                    // 一時停止からの再開
                     timer.resumeTimer()
                 }
             }) {
@@ -222,23 +226,6 @@ struct CookingTimerView: View {
             }
             .buttonStyle(.plain)
             .disabled(timer.timeRemaining == 0)
-            
-            // 開始ボタン（タイマーが設定されている場合）
-            if timer.timeRemaining > 0 && !timer.isRunning && timer.timeRemaining == timer.initialTime {
-                Button(action: {
-                    timer.startTimer(duration: timer.timeRemaining)
-                }) {
-                    Image(systemName: "play.fill")
-                        .font(.title2)
-                        .foregroundColor(.white)
-                        .frame(width: 60, height: 60)
-                        .background(
-                            Circle()
-                                .fill(Color.green)
-                        )
-                }
-                .buttonStyle(.plain)
-            }
         }
         .padding(.horizontal)
     }
