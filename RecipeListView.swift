@@ -382,7 +382,8 @@ struct RecipeDetailView: View {
             .sheet(isPresented: $isShowingCookingView) {
                 CookingSessionView(
                     recipe: recipe,
-                    cookingSession: cookingSession
+                    cookingSession: cookingSession,
+                    helperTimer: nil
                 ) { record in
                     completedRecord = record
                     // 将来: Core Dataに保存
