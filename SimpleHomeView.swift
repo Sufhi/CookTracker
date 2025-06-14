@@ -50,8 +50,15 @@ struct SimpleHomeView: View {
                 // ユーザー情報・レベル表示セクション
                 userInfoSection
                 
-                // 今日の調理提案セクション
-                todaysSuggestionSection
+                // 調理セッション中カード（調理中のみ表示）
+                if cookingSession.isRunning || cookingSession.isPaused {
+                    cookingSessionActiveCard
+                }
+                
+                // 今日の調理提案セクション（調理中でない場合のみ表示）
+                if !cookingSession.isRunning && !cookingSession.isPaused {
+                    todaysSuggestionSection
+                }
                 
                 // クイックアクションボタンセクション
                 quickActionSection
@@ -356,6 +363,121 @@ struct SimpleHomeView: View {
             }
         }
         .padding(.vertical, 4)
+    }
+    
+    @ViewBuilder
+    private var cookingSessionActiveCard: some View {
+        VStack(spacing: 16) {
+            HStack {
+                Image(systemName: "flame.fill")
+                    .foregroundColor(.orange)
+                    .font(.title2)
+                
+                Text("調理中")
+                    .font(.headline)
+                    .fontWeight(.bold)
+                    .foregroundColor(.orange)
+                
+                Spacer()
+                
+                // 状態インジケーター
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(cookingSession.isRunning ? .green : .orange)
+                        .frame(width: 8, height: 8)
+                    
+                    Text(cookingSession.statusText)
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundColor(.secondary)
+                }
+            }
+            
+            Divider()
+            
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(suggestedRecipe.title)
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.primary)
+                    
+                    Text("経過時間")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                
+                Spacer()
+                
+                VStack(alignment: .trailing, spacing: 4) {
+                    Text(cookingSession.formattedElapsedTime)
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.orange)
+                        .monospacedDigit()
+                    
+                    Text("予想: \(suggestedRecipe.estimatedTime)分")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+            
+            // アクションボタン
+            HStack(spacing: 12) {
+                // 調理セッションに戻るボタン
+                Button(action: {
+                    isShowingCookingSession = true
+                }) {
+                    HStack {
+                        Image(systemName: "arrow.right.circle.fill")
+                        Text("セッションに戻る")
+                    }
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color.orange)
+                    )
+                }
+                .buttonStyle(.plain)
+                
+                // 一時停止/再開ボタン
+                Button(action: {
+                    if cookingSession.isRunning {
+                        cookingSession.pauseCooking()
+                    } else {
+                        cookingSession.startCooking()
+                    }
+                }) {
+                    HStack {
+                        Image(systemName: cookingSession.isRunning ? "pause.fill" : "play.fill")
+                        Text(cookingSession.isRunning ? "一時停止" : "再開")
+                    }
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundColor(.orange)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.orange, lineWidth: 1)
+                    )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.orange.opacity(0.05))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.orange.opacity(0.3), lineWidth: 1)
+                )
+        )
     }
 }
 
