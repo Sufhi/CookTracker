@@ -45,28 +45,40 @@ struct SimpleHomeView: View {
     
     // MARK: - Body
     var body: some View {
-        ScrollView {
-            VStack(spacing: 20) {
-                // ユーザー情報・レベル表示セクション
-                userInfoSection
-                
-                // 調理セッション中カード（調理中のみ表示）
-                if cookingSession.isRunning || cookingSession.isPaused {
+        VStack(spacing: 0) {
+            // 調理セッション中カード（固定表示）
+            if cookingSession.isRunning || cookingSession.isPaused {
+                VStack {
                     cookingSessionActiveCard
+                        .padding(.horizontal)
+                        .padding(.top, 8)
+                        .padding(.bottom, 4)
                 }
-                
-                // 今日の調理提案セクション（調理中でない場合のみ表示）
-                if !cookingSession.isRunning && !cookingSession.isPaused {
-                    todaysSuggestionSection
-                }
-                
-                // クイックアクションボタンセクション
-                quickActionSection
-                
-                // 最近の料理履歴セクション
-                recentHistorySection
+                .background(Color(.systemGroupedBackground))
+                .shadow(color: .black.opacity(0.1), radius: 3, x: 0, y: 2)
+                .transition(.move(edge: .top).combined(with: .opacity))
+                .animation(.easeInOut(duration: 0.3), value: cookingSession.isRunning)
             }
-            .padding()
+            
+            // スクロール可能なメインコンテンツ
+            ScrollView {
+                VStack(spacing: 20) {
+                    // ユーザー情報・レベル表示セクション
+                    userInfoSection
+                    
+                    // 今日の調理提案セクション（調理中でない場合のみ表示）
+                    if !cookingSession.isRunning && !cookingSession.isPaused {
+                        todaysSuggestionSection
+                    }
+                    
+                    // クイックアクションボタンセクション
+                    quickActionSection
+                    
+                    // 最近の料理履歴セクション
+                    recentHistorySection
+                }
+                .padding()
+            }
         }
         .navigationTitle("CookTracker")
         .navigationBarTitleDisplayMode(.large)
@@ -469,13 +481,14 @@ struct SimpleHomeView: View {
                 .buttonStyle(.plain)
             }
         }
-        .padding()
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color.orange.opacity(0.05))
+                .fill(Color.orange.opacity(0.08))
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.orange.opacity(0.3), lineWidth: 1)
+                        .stroke(Color.orange.opacity(0.4), lineWidth: 1.5)
                 )
         )
     }
