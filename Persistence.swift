@@ -2,7 +2,7 @@
 import CoreData
 
 /// Core Dataの管理とサンプルデータ作成を担当するクラス
-/// - 永続化コンテナの設定とプレビュー用データの提供
+/// - 永続化コンテナの設定とレシピサンプルデータの提供
 struct PersistenceController {
     
     // MARK: - Shared Instance
@@ -12,16 +12,6 @@ struct PersistenceController {
     static var preview: PersistenceController = {
         let controller = PersistenceController(inMemory: true)
         let viewContext = controller.container.viewContext
-        
-        // サンプルユーザーデータ作成
-        let sampleUser = User(context: viewContext)
-        sampleUser.id = UUID()
-        sampleUser.username = "料理初心者"
-        sampleUser.level = 3
-        sampleUser.experiencePoints = 150
-        sampleUser.isRegistered = false
-        sampleUser.createdAt = Date()
-        sampleUser.updatedAt = Date()
         
         // サンプルレシピデータ作成
         let sampleRecipe1 = Recipe(context: viewContext)
@@ -46,20 +36,22 @@ struct PersistenceController {
         sampleRecipe2.createdAt = Date()
         sampleRecipe2.updatedAt = Date()
         
-        // サンプル調理記録作成
-        let sampleRecord = CookingRecord(context: viewContext)
-        sampleRecord.id = UUID()
-        sampleRecord.recipeId = sampleRecipe1.id
-        sampleRecord.cookingTimeInMinutes = 22
-        sampleRecord.notes = "初回にしては上手くできた！次はもう少し卵をふわふわにしたい。"
-        sampleRecord.experienceGained = 15
-        sampleRecord.cookedAt = Calendar.current.date(byAdding: .day, value: -1, to: Date()) ?? Date()
+        let sampleRecipe3 = Recipe(context: viewContext)
+        sampleRecipe3.id = UUID()
+        sampleRecipe3.title = "チキンカレー"
+        sampleRecipe3.ingredients = "鶏肉 300g\n玉ねぎ 1個\nカレールー 1/2箱\nじゃがいも 2個\nにんじん 1本"
+        sampleRecipe3.instructions = "1. 野菜を切る\n2. 鶏肉を炒める\n3. 野菜を炒める\n4. 水を加えて煮込む\n5. カレールーを溶かす"
+        sampleRecipe3.category = "食事"
+        sampleRecipe3.difficulty = 3
+        sampleRecipe3.estimatedTimeInMinutes = 45
+        sampleRecipe3.createdAt = Date()
+        sampleRecipe3.updatedAt = Date()
         
         do {
             try viewContext.save()
+            print("✅ サンプルレシピデータ作成成功")
         } catch {
-            let nsError = error as NSError
-            fatalError("❌ サンプルデータ作成エラー: \(nsError), \(nsError.userInfo)")
+            print("❌ サンプルデータ作成エラー: \(error.localizedDescription)")
         }
         
         return controller
@@ -78,7 +70,9 @@ struct PersistenceController {
         
         container.loadPersistentStores { _, error in
             if let error = error as NSError? {
-                fatalError("❌ Core Data読み込みエラー: \(error), \(error.userInfo)")
+                print("❌ Core Data読み込みエラー: \(error), \(error.userInfo)")
+            } else {
+                print("✅ Core Data初期化成功")
             }
         }
         

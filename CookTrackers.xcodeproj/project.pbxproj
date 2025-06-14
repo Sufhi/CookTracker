@@ -6,6 +6,15 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		70E89D4A2DFD97FF00657FFA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 70E89D472DFD97FF00657FFA /* Assets.xcassets */; };
+		70E89D4B2DFD97FF00657FFA /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E89D482DFD97FF00657FFA /* ContentView.swift */; };
+		70E89D4C2DFD97FF00657FFA /* CookTrackersApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E89D492DFD97FF00657FFA /* CookTrackersApp.swift */; };
+		70E89D922DFD9CCD00657FFA /* SimpleHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E89D912DFD9CCD00657FFA /* SimpleHomeView.swift */; };
+		70E89D942DFDA3B200657FFA /* RecipeListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E89D932DFDA3B200657FFA /* RecipeListView.swift */; };
+		70E89D972DFDA54400657FFA /* AddRecipeFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E89D962DFDA54400657FFA /* AddRecipeFormView.swift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		704EFA402DFD972E004C7930 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,22 +36,18 @@
 		704EFA322DFD972D004C7930 /* CookTrackers.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CookTrackers.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		704EFA3F2DFD972E004C7930 /* CookTrackersTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CookTrackersTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		704EFA492DFD972E004C7930 /* CookTrackersUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CookTrackersUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		70E89D472DFD97FF00657FFA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		70E89D482DFD97FF00657FFA /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		70E89D492DFD97FF00657FFA /* CookTrackersApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookTrackersApp.swift; sourceTree = "<group>"; };
+		70E89D912DFD9CCD00657FFA /* SimpleHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleHomeView.swift; sourceTree = "<group>"; };
+		70E89D932DFDA3B200657FFA /* RecipeListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeListView.swift; sourceTree = "<group>"; };
+		70E89D962DFDA54400657FFA /* AddRecipeFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddRecipeFormView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		704EFA342DFD972D004C7930 /* CookTrackers */ = {
+		70E89D812DFD984500657FFA /* CookTracker */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = CookTrackers;
-			sourceTree = "<group>";
-		};
-		704EFA422DFD972E004C7930 /* CookTrackersTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = CookTrackersTests;
-			sourceTree = "<group>";
-		};
-		704EFA4C2DFD972E004C7930 /* CookTrackersUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = CookTrackersUITests;
+			path = CookTracker;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -75,10 +80,14 @@
 		704EFA292DFD972D004C7930 = {
 			isa = PBXGroup;
 			children = (
-				704EFA342DFD972D004C7930 /* CookTrackers */,
-				704EFA422DFD972E004C7930 /* CookTrackersTests */,
-				704EFA4C2DFD972E004C7930 /* CookTrackersUITests */,
+				70E89D912DFD9CCD00657FFA /* SimpleHomeView.swift */,
+				70E89D812DFD984500657FFA /* CookTracker */,
+				70E89D472DFD97FF00657FFA /* Assets.xcassets */,
+				70E89D482DFD97FF00657FFA /* ContentView.swift */,
+				70E89D932DFDA3B200657FFA /* RecipeListView.swift */,
+				70E89D492DFD97FF00657FFA /* CookTrackersApp.swift */,
 				704EFA332DFD972D004C7930 /* Products */,
+				70E89D962DFDA54400657FFA /* AddRecipeFormView.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -108,7 +117,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				704EFA342DFD972D004C7930 /* CookTrackers */,
+				70E89D812DFD984500657FFA /* CookTracker */,
 			);
 			name = CookTrackers;
 			packageProductDependencies = (
@@ -130,9 +139,6 @@
 			dependencies = (
 				704EFA412DFD972E004C7930 /* PBXTargetDependency */,
 			);
-			fileSystemSynchronizedGroups = (
-				704EFA422DFD972E004C7930 /* CookTrackersTests */,
-			);
 			name = CookTrackersTests;
 			packageProductDependencies = (
 			);
@@ -152,9 +158,6 @@
 			);
 			dependencies = (
 				704EFA4B2DFD972E004C7930 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				704EFA4C2DFD972E004C7930 /* CookTrackersUITests */,
 			);
 			name = CookTrackersUITests;
 			packageProductDependencies = (
@@ -212,6 +215,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				70E89D4A2DFD97FF00657FFA /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -236,6 +240,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				70E89D4B2DFD97FF00657FFA /* ContentView.swift in Sources */,
+				70E89D4C2DFD97FF00657FFA /* CookTrackersApp.swift in Sources */,
+				70E89D972DFDA54400657FFA /* AddRecipeFormView.swift in Sources */,
+				70E89D942DFDA3B200657FFA /* RecipeListView.swift in Sources */,
+				70E89D922DFD9CCD00657FFA /* SimpleHomeView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -409,6 +418,10 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = bas.CookTrackers;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -436,6 +449,10 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = bas.CookTrackers;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
