@@ -120,7 +120,7 @@ class CookingTimer: ObservableObject {
         print("▶️ 補助タイマー再開")
     }
     
-    /// タイマーをリセット（完全停止）
+    /// タイマーをリセット（初期状態に戻す）
     func resetTimer() {
         stopTimer()
         timeRemaining = 0
@@ -128,7 +128,7 @@ class CookingTimer: ObservableObject {
         isFinished = false
         pausedTime = 0
         
-        print("🔄 補助タイマーリセット（停止）")
+        print("🔄 補助タイマーリセット（初期状態）")
     }
     
     /// クイック設定メソッド
