@@ -6,17 +6,6 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		70E89D4A2DFD97FF00657FFA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 70E89D472DFD97FF00657FFA /* Assets.xcassets */; };
-		70E89D4B2DFD97FF00657FFA /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E89D482DFD97FF00657FFA /* ContentView.swift */; };
-		70E89D4C2DFD97FF00657FFA /* CookTrackersApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E89D492DFD97FF00657FFA /* CookTrackersApp.swift */; };
-		70E89D922DFD9CCD00657FFA /* SimpleHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E89D912DFD9CCD00657FFA /* SimpleHomeView.swift */; };
-		70E89D942DFDA3B200657FFA /* RecipeListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E89D932DFDA3B200657FFA /* RecipeListView.swift */; };
-		70E89D972DFDA54400657FFA /* AddRecipeFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E89D962DFDA54400657FFA /* AddRecipeFormView.swift */; };
-		70E89D992DFE2A3500657FFA /* CookingTimerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E89D982DFE2A3500657FFA /* CookingTimerView.swift */; };
-		70E89D9D2DFE2AAB00657FFA /* CookingTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E89D9C2DFE2AAB00657FFA /* CookingTimer.swift */; };
-/* End PBXBuildFile section */
-
 /* Begin PBXContainerItemProxy section */
 		704EFA402DFD972E004C7930 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -35,26 +24,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		704EFA322DFD972D004C7930 /* CookTrackers.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CookTrackers.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		704EFA3F2DFD972E004C7930 /* CookTrackersTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CookTrackersTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		704EFA492DFD972E004C7930 /* CookTrackersUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CookTrackersUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		70E89D472DFD97FF00657FFA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		70E89D482DFD97FF00657FFA /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		70E89D492DFD97FF00657FFA /* CookTrackersApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookTrackersApp.swift; sourceTree = "<group>"; };
-		70E89D912DFD9CCD00657FFA /* SimpleHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleHomeView.swift; sourceTree = "<group>"; };
-		70E89D932DFDA3B200657FFA /* RecipeListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeListView.swift; sourceTree = "<group>"; };
-		70E89D962DFDA54400657FFA /* AddRecipeFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddRecipeFormView.swift; sourceTree = "<group>"; };
-		70E89D982DFE2A3500657FFA /* CookingTimerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookingTimerView.swift; sourceTree = "<group>"; };
-		70E89D9C2DFE2AAB00657FFA /* CookingTimer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookingTimer.swift; sourceTree = "<group>"; };
+		704EFA322DFD972D004C7930 /* CookTrackers.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = CookTrackers.app; path = "/Users/tsubasakubota/code/cooktracker/CookTrackers/build/Debug-iphoneos/CookTrackers.app"; sourceTree = "<absolute>"; };
+		704EFA3F2DFD972E004C7930 /* CookTrackersTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = CookTrackersTests.xctest; path = "/Users/tsubasakubota/code/cooktracker/CookTrackers/build/Debug-iphoneos/CookTrackers.app/PlugIns/CookTrackersTests.xctest"; sourceTree = "<absolute>"; };
+		704EFA492DFD972E004C7930 /* CookTrackersUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = CookTrackersUITests.xctest; path = "/Users/tsubasakubota/code/cooktracker/CookTrackers/build/Debug-iphoneos/CookTrackersUITests-Runner.app/PlugIns/CookTrackersUITests.xctest"; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
-
-/* Begin PBXFileSystemSynchronizedRootGroup section */
-		70E89D812DFD984500657FFA /* CookTracker */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = CookTracker;
-			sourceTree = "<group>";
-		};
-/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		704EFA2F2DFD972D004C7930 /* Frameworks */ = {
@@ -84,27 +57,7 @@
 		704EFA292DFD972D004C7930 = {
 			isa = PBXGroup;
 			children = (
-				70E89D912DFD9CCD00657FFA /* SimpleHomeView.swift */,
-				70E89D982DFE2A3500657FFA /* CookingTimerView.swift */,
-				70E89D9C2DFE2AAB00657FFA /* CookingTimer.swift */,
-				70E89D812DFD984500657FFA /* CookTracker */,
-				70E89D472DFD97FF00657FFA /* Assets.xcassets */,
-				70E89D482DFD97FF00657FFA /* ContentView.swift */,
-				70E89D932DFDA3B200657FFA /* RecipeListView.swift */,
-				70E89D492DFD97FF00657FFA /* CookTrackersApp.swift */,
-				704EFA332DFD972D004C7930 /* Products */,
-				70E89D962DFDA54400657FFA /* AddRecipeFormView.swift */,
 			);
-			sourceTree = "<group>";
-		};
-		704EFA332DFD972D004C7930 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				704EFA322DFD972D004C7930 /* CookTrackers.app */,
-				704EFA3F2DFD972E004C7930 /* CookTrackersTests.xctest */,
-				704EFA492DFD972E004C7930 /* CookTrackersUITests.xctest */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -121,9 +74,6 @@
 			buildRules = (
 			);
 			dependencies = (
-			);
-			fileSystemSynchronizedGroups = (
-				70E89D812DFD984500657FFA /* CookTracker */,
 			);
 			name = CookTrackers;
 			packageProductDependencies = (
@@ -205,7 +155,7 @@
 			mainGroup = 704EFA292DFD972D004C7930;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = 704EFA332DFD972D004C7930 /* Products */;
+			productRefGroup = 704EFA292DFD972D004C7930;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -221,7 +171,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				70E89D4A2DFD97FF00657FFA /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -246,13 +195,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				70E89D4B2DFD97FF00657FFA /* ContentView.swift in Sources */,
-				70E89D4C2DFD97FF00657FFA /* CookTrackersApp.swift in Sources */,
-				70E89D972DFDA54400657FFA /* AddRecipeFormView.swift in Sources */,
-				70E89D942DFDA3B200657FFA /* RecipeListView.swift in Sources */,
-				70E89D9D2DFE2AAB00657FFA /* CookingTimer.swift in Sources */,
-				70E89D922DFD9CCD00657FFA /* SimpleHomeView.swift in Sources */,
-				70E89D992DFE2A3500657FFA /* CookingTimerView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

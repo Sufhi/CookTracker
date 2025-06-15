@@ -1,7 +1,6 @@
 // MARK: - Imports
 import Foundation
 import SwiftUI
-import UIKit
 
 /// 調理セッション用カウントアップタイマー
 /// - 調理開始から調理終了までの実際の時間を記録
@@ -19,7 +18,6 @@ class CookingSessionTimer: ObservableObject {
     private var startDate: Date?
     private var pausedDuration: TimeInterval = 0    // 一時停止累積時間
     private var lastPauseDate: Date?
-    private var backgroundTaskID: UIBackgroundTaskIdentifier = .invalid
     
     // MARK: - Computed Properties
     
@@ -76,9 +74,6 @@ class CookingSessionTimer: ObservableObject {
         
         isRunning = true
         
-        // バックグラウンドタスク開始
-        startBackgroundTask()
-        
         // タイマー開始（1秒間隔で更新）
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             self?.updateElapsedTime()
@@ -97,9 +92,6 @@ class CookingSessionTimer: ObservableObject {
         isPaused = true
         lastPauseDate = Date()
         
-        // バックグラウンドタスク終了
-        endBackgroundTask()
-        
         print("⏸ 調理一時停止: 経過時間 \(formattedElapsedTime)")
     }
     
@@ -109,9 +101,6 @@ class CookingSessionTimer: ObservableObject {
         // タイマー停止
         timer?.invalidate()
         timer = nil
-        
-        // バックグラウンドタスク終了
-        endBackgroundTask()
         
         let finalElapsedTime = elapsedTime
         let record = CookingSessionRecord(
@@ -136,9 +125,6 @@ class CookingSessionTimer: ObservableObject {
         timer?.invalidate()
         timer = nil
         
-        // バックグラウンドタスク終了
-        endBackgroundTask()
-        
         elapsedTime = 0
         pausedDuration = 0
         isRunning = false
@@ -160,23 +146,6 @@ class CookingSessionTimer: ObservableObject {
             self.elapsedTime = totalElapsed - self.pausedDuration
             
             self.objectWillChange.send()
-        }
-    }
-    
-    // MARK: - Background Task Management
-    
-    private func startBackgroundTask() {
-        backgroundTaskID = UIApplication.shared.beginBackgroundTask(withName: "CookingSession") { [weak self] in
-            self?.endBackgroundTask()
-        }
-        print("🔄 バックグラウンドタスク開始: \(backgroundTaskID.rawValue)")
-    }
-    
-    private func endBackgroundTask() {
-        if backgroundTaskID != .invalid {
-            UIApplication.shared.endBackgroundTask(backgroundTaskID)
-            print("⏹ バックグラウンドタスク終了: \(backgroundTaskID.rawValue)")
-            backgroundTaskID = .invalid
         }
     }
 }

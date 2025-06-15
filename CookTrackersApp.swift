@@ -8,13 +8,13 @@ import UserNotifications
 struct CookTrackersApp: App {
     
     // MARK: - Properties
-    // let persistenceController = PersistenceController.shared // Persistence.swiftファイルがプロジェクトに追加されるまで一時的にコメントアウト
+    let persistenceController = PersistenceController.shared
     
     // MARK: - Body
     var body: some Scene {
         WindowGroup {
             ContentView()
-                // .environment(\.managedObjectContext, persistenceController.container.viewContext) // 一時的にコメントアウト
+                .environment(\.managedObjectContext, persistenceController.container.viewContext)
                 .onAppear {
                     setupNotifications()
                 }

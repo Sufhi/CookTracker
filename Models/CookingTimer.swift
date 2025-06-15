@@ -2,7 +2,6 @@
 import Foundation
 import SwiftUI
 import UserNotifications
-import UIKit
 
 /// 調理タイマーのロジックを管理するクラス
 /// - バックグラウンド動作対応
@@ -20,7 +19,6 @@ class CookingTimer: ObservableObject {
     private var timer: Timer?
     private var startDate: Date?
     private var backgroundTaskID: UIBackgroundTaskIdentifier = .invalid
-    private var pausedTime: TimeInterval = 0    // 一時停止時の残り時間
     
     // MARK: - Computed Properties
     var progress: Double {
@@ -67,7 +65,7 @@ class CookingTimer: ObservableObject {
         // 通知スケジュール
         scheduleNotification(duration: duration)
         
-        print("✅ 補助タイマー開始: \(duration)秒")
+        print("✅ タイマー開始: \(duration)秒")
     }
     
     /// タイマーを停止
@@ -82,7 +80,7 @@ class CookingTimer: ObservableObject {
         // 通知キャンセル
         cancelNotification()
         
-        print("⏹ 補助タイマー停止")
+        print("⏹ タイマー停止")
     }
     
     /// タイマーを一時停止
@@ -90,14 +88,10 @@ class CookingTimer: ObservableObject {
         timer?.invalidate()
         timer = nil
         isRunning = false
-        pausedTime = timeRemaining
-        
-        // バックグラウンドタスク終了
-        endBackgroundTask()
         
         cancelNotification()
         
-        print("⏸ 補助タイマー一時停止")
+        print("⏸ タイマー一時停止")
     }
     
     /// タイマーを再開
@@ -107,9 +101,6 @@ class CookingTimer: ObservableObject {
         isRunning = true
         startDate = Date()
         
-        // バックグラウンドタスク開始
-        startBackgroundTask()
-        
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             self?.updateTimer()
         }
@@ -117,18 +108,16 @@ class CookingTimer: ObservableObject {
         // 残り時間で通知スケジュール
         scheduleNotification(duration: timeRemaining)
         
-        print("▶️ 補助タイマー再開")
+        print("▶️ タイマー再開")
     }
     
-    /// タイマーをリセット（初期状態に戻す）
+    /// タイマーをリセット
     func resetTimer() {
         stopTimer()
-        timeRemaining = 0
-        initialTime = 0
+        timeRemaining = initialTime
         isFinished = false
-        pausedTime = 0
         
-        print("🔄 補助タイマーリセット（初期状態）")
+        print("🔄 タイマーリセット")
     }
     
     /// クイック設定メソッド
@@ -161,7 +150,7 @@ class CookingTimer: ObservableObject {
         // 完了通知
         sendCompletionNotification()
         
-        print("🎉 補助タイマー完了！")
+        print("🎉 タイマー完了！")
     }
     
     // MARK: - Background Task Management
@@ -227,23 +216,6 @@ class CookingTimer: ObservableObject {
             if let error = error {
                 print("❌ 完了通知失敗: \(error.localizedDescription)")
             }
-        }
-    }
-    
-    // MARK: - Background Task Management
-    
-    private func startBackgroundTask() {
-        backgroundTaskID = UIApplication.shared.beginBackgroundTask(withName: "HelperTimer") { [weak self] in
-            self?.endBackgroundTask()
-        }
-        print("🔄 補助タイマーバックグラウンドタスク開始: \(backgroundTaskID.rawValue)")
-    }
-    
-    private func endBackgroundTask() {
-        if backgroundTaskID != .invalid {
-            UIApplication.shared.endBackgroundTask(backgroundTaskID)
-            print("⏹ 補助タイマーバックグラウンドタスク終了: \(backgroundTaskID.rawValue)")
-            backgroundTaskID = .invalid
         }
     }
 }
