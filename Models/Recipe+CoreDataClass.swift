@@ -7,6 +7,33 @@ import CoreData
 @objc(Recipe)
 public class Recipe: NSManagedObject {
     
+    // MARK: - Convenience Initializer
+    convenience init(context: NSManagedObjectContext, title: String, ingredients: String, category: String = "食事", difficulty: Int32 = 2, estimatedTime: Int32 = 20) {
+        guard let entity = NSEntityDescription.entity(forEntityName: "Recipe", in: context) else {
+            fatalError("Recipe entity not found in Core Data model")
+        }
+        self.init(entity: entity, insertInto: context)
+        self.id = UUID()
+        self.title = title
+        self.ingredients = ingredients
+        self.category = category
+        self.difficulty = difficulty
+        self.estimatedTimeInMinutes = estimatedTime
+        self.createdAt = Date()
+        self.updatedAt = Date()
+    }
+    
+    // MARK: - Computed Properties
+    
+    /// カテゴリの安全な取得（デフォルト値付き）
+    var safeCategory: String {
+        return category ?? "食事"
+    }
+    
+    /// タイトルの安全な取得（デフォルト値付き）
+    var safeTitle: String {
+        return title ?? "無題のレシピ"
+    }
 }
 
 // MARK: - Generated accessors

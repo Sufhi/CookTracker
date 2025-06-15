@@ -29,6 +29,7 @@ struct HomeView: View {
     
     @State private var isShowingAddRecipe = false
     @State private var isShowingCookingTimer = false
+    @StateObject private var cookingTimer = CookingTimer()
     
     // MARK: - Computed Properties
     private var currentUser: User? {
@@ -88,7 +89,7 @@ struct HomeView: View {
                 AddRecipeView()
             }
             .sheet(isPresented: $isShowingCookingTimer) {
-                CookingTimerView()
+                CookingTimerView(timer: cookingTimer)
             }
         }
     }
