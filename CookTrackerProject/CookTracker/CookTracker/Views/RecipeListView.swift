@@ -63,7 +63,7 @@ struct RecipeListView: View {
                 }
             }
             .sheet(isPresented: $isShowingAddRecipe) {
-                CoreDataAddRecipeView()
+                RecipeFormView()
             }
             .sheet(item: $selectedRecipe) { recipe in
                 CoreDataRecipeDetailView(recipe: recipe)
@@ -160,80 +160,6 @@ struct RecipeListView: View {
     }
 }
 
-// MARK: - Core Data Recipe Row View
-struct CoreDataRecipeRowView: View {
-    let recipe: Recipe
-    let onTap: () -> Void
-    
-    var body: some View {
-        Button(action: onTap) {
-            HStack(spacing: 16) {
-                // レシピ画像またはプレースホルダー
-                Group {
-                    if let thumbnailImage = recipe.thumbnailImage {
-                        Image(uiImage: thumbnailImage)
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: 80, height: 80)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                    } else {
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(Color.brown.opacity(0.1))
-                            .frame(width: 80, height: 80)
-                            .overlay(
-                                Image(systemName: "fork.knife")
-                                    .font(.system(size: 24))
-                                    .foregroundColor(.brown.opacity(0.6))
-                            )
-                    }
-                }
-                
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(recipe.title ?? "無題のレシピ")
-                        .font(.headline)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.primary)
-                        .lineLimit(1)
-                    
-                    HStack {
-                        Label("\(Int(recipe.estimatedTimeInMinutes))分", systemImage: "clock")
-                        
-                        Spacer()
-                        
-                        HStack(spacing: 2) {
-                            ForEach(0..<5) { index in
-                                Image(systemName: index < Int(recipe.difficulty) ? "star.fill" : "star")
-                                    .font(.caption)
-                                    .foregroundColor(index < Int(recipe.difficulty) ? .brown : .gray.opacity(0.3))
-                            }
-                        }
-                    }
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    
-                    Text(recipe.category ?? "食事")
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .foregroundColor(.brown)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 2)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.brown.opacity(0.1))
-                        )
-                }
-                
-                Spacer()
-                
-                Image(systemName: "chevron.right")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-            .padding(.vertical, 8)
-        }
-        .buttonStyle(.plain)
-    }
-}
 
 // MARK: - Sample Recipe Model
 struct SampleRecipe: Identifiable {
@@ -428,189 +354,6 @@ struct SimpleAddRecipeView: View {
     }
 }
 
-// MARK: - Core Data Add Recipe View
-struct CoreDataAddRecipeView: View {
-    @Environment(\.dismiss) private var dismiss
-    @Environment(\.managedObjectContext) private var viewContext
-    @State private var title = ""
-    @State private var ingredients = ""
-    @State private var instructions = ""
-    @State private var category = "食事"
-    @State private var difficulty: Double = 2
-    @State private var estimatedTime: Double = 20
-    @State private var url = ""
-    
-    var body: some View {
-        NavigationView {
-            Form {
-                Section("基本情報") {
-                    TextField("レシピ名", text: $title)
-                    
-                    Picker("カテゴリ", selection: $category) {
-                        Text("食事").tag("食事")
-                        Text("デザート").tag("デザート")
-                        Text("おつまみ").tag("おつまみ")
-                    }
-                    
-                    VStack(alignment: .leading) {
-                        Text("難易度: \(Int(difficulty))")
-                        Slider(value: $difficulty, in: 1...5, step: 1)
-                    }
-                    
-                    VStack(alignment: .leading) {
-                        Text("予想時間: \(Int(estimatedTime))分")
-                        Slider(value: $estimatedTime, in: 5...120, step: 5)
-                    }
-                }
-                
-                Section("材料") {
-                    TextEditor(text: $ingredients)
-                        .frame(minHeight: 100)
-                }
-                
-                Section("作り方") {
-                    TextEditor(text: $instructions)
-                        .frame(minHeight: 100)
-                }
-                
-                Section("URL（任意）") {
-                    TextField("レシピのURL", text: $url)
-                        .keyboardType(.URL)
-                }
-                
-                Section {
-                    Button("レシピを追加") {
-                        saveRecipe()
-                    }
-                    .disabled(title.isEmpty || ingredients.isEmpty)
-                }
-            }
-            .navigationTitle("レシピ追加")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("キャンセル") {
-                        dismiss()
-                    }
-                }
-            }
-        }
-    }
-    
-    private func saveRecipe() {
-        let newRecipe = Recipe(context: viewContext)
-        newRecipe.id = UUID()
-        newRecipe.title = title
-        newRecipe.ingredients = ingredients
-        newRecipe.instructions = instructions
-        newRecipe.category = category
-        newRecipe.difficulty = Int32(difficulty)
-        newRecipe.estimatedTimeInMinutes = Int32(estimatedTime)
-        newRecipe.url = url.isEmpty ? nil : url
-        newRecipe.createdAt = Date()
-        newRecipe.updatedAt = Date()
-        
-        PersistenceController.shared.save()
-        dismiss()
-    }
-}
-
-// MARK: - Core Data Edit Recipe View
-struct CoreDataEditRecipeView: View {
-    let recipe: Recipe
-    @Environment(\.dismiss) private var dismiss
-    @Environment(\.managedObjectContext) private var viewContext
-    
-    @State private var title: String
-    @State private var ingredients: String
-    @State private var instructions: String
-    @State private var category: String
-    @State private var difficulty: Double
-    @State private var estimatedTime: Double
-    @State private var url: String
-    
-    init(recipe: Recipe) {
-        self.recipe = recipe
-        _title = State(initialValue: recipe.title ?? "")
-        _ingredients = State(initialValue: recipe.ingredients ?? "")
-        _instructions = State(initialValue: recipe.instructions ?? "")
-        _category = State(initialValue: recipe.category ?? "食事")
-        _difficulty = State(initialValue: Double(recipe.difficulty))
-        _estimatedTime = State(initialValue: Double(recipe.estimatedTimeInMinutes))
-        _url = State(initialValue: recipe.url ?? "")
-    }
-    
-    var body: some View {
-        NavigationView {
-            Form {
-                Section("基本情報") {
-                    TextField("レシピ名", text: $title)
-                    
-                    Picker("カテゴリ", selection: $category) {
-                        Text("食事").tag("食事")
-                        Text("デザート").tag("デザート")
-                        Text("おつまみ").tag("おつまみ")
-                    }
-                    
-                    VStack(alignment: .leading) {
-                        Text("難易度: \(Int(difficulty))")
-                        Slider(value: $difficulty, in: 1...5, step: 1)
-                    }
-                    
-                    VStack(alignment: .leading) {
-                        Text("予想時間: \(Int(estimatedTime))分")
-                        Slider(value: $estimatedTime, in: 5...120, step: 5)
-                    }
-                }
-                
-                Section("材料") {
-                    TextEditor(text: $ingredients)
-                        .frame(minHeight: 100)
-                }
-                
-                Section("作り方") {
-                    TextEditor(text: $instructions)
-                        .frame(minHeight: 100)
-                }
-                
-                Section("URL（任意）") {
-                    TextField("レシピのURL", text: $url)
-                        .keyboardType(.URL)
-                }
-                
-                Section {
-                    Button("変更を保存") {
-                        saveRecipe()
-                    }
-                    .disabled(title.isEmpty || ingredients.isEmpty)
-                }
-            }
-            .navigationTitle("レシピ編集")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("キャンセル") {
-                        dismiss()
-                    }
-                }
-            }
-        }
-    }
-    
-    private func saveRecipe() {
-        recipe.title = title
-        recipe.ingredients = ingredients
-        recipe.instructions = instructions
-        recipe.category = category
-        recipe.difficulty = Int32(difficulty)
-        recipe.estimatedTimeInMinutes = Int32(estimatedTime)
-        recipe.url = url.isEmpty ? nil : url
-        recipe.updatedAt = Date()
-        
-        PersistenceController.shared.save()
-        dismiss()
-    }
-}
 
 // MARK: - Core Data Recipe Detail View
 struct CoreDataRecipeDetailView: View {
@@ -799,7 +542,7 @@ struct CoreDataRecipeDetailView: View {
                 }
             }
             .sheet(isPresented: $isShowingEditView) {
-                CoreDataEditRecipeView(recipe: recipe)
+                RecipeFormView(recipe: recipe)
             }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {

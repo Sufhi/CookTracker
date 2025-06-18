@@ -37,10 +37,6 @@ struct HistoryStatsView: View {
                     // 統計タブ
                     statsTabView
                         .tag(1)
-                    
-                    // バッジタブ
-                    badgeTabView
-                        .tag(2)
                 }
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
             }
@@ -130,19 +126,6 @@ struct HistoryStatsView: View {
         }
     }
     
-    @ViewBuilder
-    private var badgeTabView: some View {
-        ScrollView {
-            VStack(spacing: 20) {
-                if let user = currentUser {
-                    BadgeListView(user: user)
-                } else {
-                    Text("データを読み込み中...")
-                        .foregroundColor(.secondary)
-                }
-            }
-        }
-    }
     
     @ViewBuilder
     private var emptyHistoryView: some View {
@@ -218,13 +201,12 @@ struct HistoryStatsView: View {
 
 // MARK: - Tab Type
 enum TabType: CaseIterable {
-    case history, stats, badges
+    case history, stats
     
     var title: String {
         switch self {
         case .history: return "履歴"
         case .stats: return "統計"
-        case .badges: return "バッジ"
         }
     }
     
@@ -232,7 +214,6 @@ enum TabType: CaseIterable {
         switch self {
         case .history: return "clock"
         case .stats: return "chart.bar"
-        case .badges: return "trophy"
         }
     }
 }
