@@ -124,10 +124,7 @@ struct SimpleHomeView: View {
         .navigationTitle("CookTracker")
         .navigationBarTitleDisplayMode(.large)
         .sheet(isPresented: $isShowingAddRecipe) {
-            CoreDataAddRecipeView(onStartCooking: { recipe in
-                let _ = sessionManager.startCookingSession(for: recipe)
-                isShowingCookingSession = true
-            })
+            CoreDataAddRecipeView()
         }
         .sheet(isPresented: $isShowingTimer) {
             CookingTimerView(timer: sessionManager.sharedHelperTimer)
