@@ -194,7 +194,8 @@ struct HistoryStatsView: View {
         // 昨日から逆順にチェック
         var checkDate = calendar.date(byAdding: .day, value: -1, to: currentDate)!
         
-        while let checkingDate = checkDate {
+        while checkDate != nil {
+            let checkingDate = checkDate!
             let startOfDay = calendar.startOfDay(for: checkingDate)
             let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
             
