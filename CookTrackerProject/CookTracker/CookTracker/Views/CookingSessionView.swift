@@ -316,11 +316,12 @@ struct CookingSessionView: View {
                     .padding()
                     .background(
                         RoundedRectangle(cornerRadius: 8)
-                            .fill(Color.blue.opacity(0.1))
+                            .fill(helperTimer != nil ? Color.blue.opacity(0.1) : Color.gray.opacity(0.1))
                     )
-                    .foregroundColor(.blue)
+                    .foregroundColor(helperTimer != nil ? .blue : .gray)
                 }
                 .buttonStyle(.plain)
+                .disabled(helperTimer == nil)
                 
                 // レシピ確認ボタン（プレースホルダー）
                 Button(action: {

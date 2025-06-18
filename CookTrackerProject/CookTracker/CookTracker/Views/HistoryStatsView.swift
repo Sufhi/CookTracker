@@ -110,7 +110,11 @@ struct HistoryStatsView: View {
             VStack(spacing: 20) {
                 if let user = currentUser {
                     // ユーザー統計カード
-                    UserStatsCard(user: user, totalRecords: cookingRecords.count)
+                    UserStatsCard(
+                        user: user, 
+                        totalRecords: cookingRecords.count,
+                        cookingRecords: Array(cookingRecords)
+                    )
                     
                     // 調理統計
                     CookingStatsSection(records: Array(cookingRecords))
@@ -350,6 +354,7 @@ struct HistoryRecordRow: View {
 struct UserStatsCard: View {
     let user: User
     let totalRecords: Int
+    let cookingRecords: [CookingRecord]
     
     var body: some View {
         VStack(spacing: 16) {
@@ -409,7 +414,7 @@ struct UserStatsCard: View {
                 StatItemView(
                     icon: "calendar",
                     title: "連続記録",
-                    value: "\(calculateConsecutiveDays())日"
+                    value: "\(CookingStats.currentStreakDays(from: Array(cookingRecords)))日"
                 )
             }
         }

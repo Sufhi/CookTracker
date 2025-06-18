@@ -17,7 +17,7 @@ struct RecipeCookingHistoryView: View {
     
     @State private var selectedRecord: CookingRecord?
     @State private var isShowingCookingSession = false
-    @StateObject private var cookingSession = CookingSessionTimer()
+    @EnvironmentObject private var sessionManager: CookingSessionManager
     @State private var currentUser: User?
     
     // MARK: - Initializer
@@ -74,13 +74,17 @@ struct RecipeCookingHistoryView: View {
                 CookingRecordDetailView(cookingRecord: record)
             }
             .sheet(isPresented: $isShowingCookingSession) {
-                CoreDataCookingSessionView(
-                    recipe: recipe,
-                    cookingSession: cookingSession,
-                    helperTimer: nil,
-                    user: currentUser
-                ) { record in
-                    print("✅ 新しい調理記録が追加されました")
+                if let currentRecipe = sessionManager.currentRecipe,
+                   let currentSession = sessionManager.currentSession {
+                    CookingSessionView(
+                        recipe: RecipeConverter.toSampleRecipe(currentRecipe),
+                        cookingSession: currentSession,
+                        onCookingComplete: { sampleRecord in
+                            print("✅ 新しい調理記録が追加されました")
+                            sessionManager.finishCookingSession()
+                        },
+                        helperTimer: sessionManager.sharedHelperTimer
+                    )
                 }
             }
             .onAppear {
@@ -250,6 +254,7 @@ struct RecipeCookingHistoryView: View {
             }
             
             Button("調理を開始") {
+                let _ = sessionManager.startCookingSession(for: recipe)
                 isShowingCookingSession = true
             }
             .buttonStyle(.borderedProminent)

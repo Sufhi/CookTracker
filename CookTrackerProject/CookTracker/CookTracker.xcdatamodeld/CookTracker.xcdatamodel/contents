@@ -25,6 +25,7 @@
         <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="ingredients" optional="YES" attributeType="String"/>
         <attribute name="instructions" optional="YES" attributeType="String"/>
+        <attribute name="thumbnailImagePath" optional="YES" attributeType="String"/>
         <attribute name="thumbnailUrl" optional="YES" attributeType="String"/>
         <attribute name="title" optional="YES" attributeType="String"/>
         <attribute name="updatedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
