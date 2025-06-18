@@ -28,9 +28,6 @@ struct CookingCompletionView: View {
     @State private var leveledUp = false
     @State private var newLevel: Int = 1
     @State private var experienceGained: Int = 15
-    @State private var earnedBadges: [BadgeType] = []
-    @State private var isShowingBadgeAnimation = false
-    @StateObject private var badgeSystem = BadgeSystem.shared
     
     // MARK: - Body
     var body: some View {
@@ -91,14 +88,6 @@ struct CookingCompletionView: View {
                             checkForBadges()
                         }
                     )
-                }
-            }
-            .overlay {
-                if isShowingBadgeAnimation && !earnedBadges.isEmpty {
-                    BadgeAcquisitionView(badges: earnedBadges) {
-                        isShowingBadgeAnimation = false
-                        earnedBadges = []
-                    }
                 }
             }
         }
@@ -455,24 +444,6 @@ struct CookingCompletionView: View {
         return photoPaths
     }
     
-    /// バッジチェック
-    private func checkForBadges() {
-        guard let user = user else { return }
-        
-        let record = createCookingRecord()
-        let newBadges = badgeSystem.checkBadgesForCookingCompletion(
-            user: user,
-            cookingRecord: record,
-            photoCount: photoImages.count
-        )
-        
-        if !newBadges.isEmpty {
-            earnedBadges = newBadges
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                isShowingBadgeAnimation = true
-            }
-        }
-    }
 }
 
 // MARK: - Camera View

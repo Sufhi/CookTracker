@@ -13,7 +13,6 @@ struct HistoryStatsView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @State private var selectedTab = 0
     @State private var currentUser: User?
-    @StateObject private var badgeSystem = BadgeSystem.shared
     
     // Core Data取得
     @FetchRequest(

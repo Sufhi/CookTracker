@@ -10,12 +10,17 @@ import SwiftUI
 @main
 struct CookTrackerApp: App {
     let persistenceController = PersistenceController.shared
+    @AppStorage("hasAcceptedTerms") private var hasAcceptedTerms = false
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environment(\.managedObjectContext, persistenceController.container.viewContext)
-                .environmentObject(CookingSessionManager.shared)
+            if hasAcceptedTerms {
+                ContentView()
+                    .environment(\.managedObjectContext, persistenceController.container.viewContext)
+                    .environmentObject(CookingSessionManager.shared)
+            } else {
+                OnboardingView(hasAcceptedTerms: $hasAcceptedTerms)
+            }
         }
     }
 }
