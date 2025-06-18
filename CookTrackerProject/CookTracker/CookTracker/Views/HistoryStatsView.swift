@@ -13,6 +13,7 @@ struct HistoryStatsView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @State private var selectedTab = 0
     @State private var currentUser: User?
+    @State private var isShowingSettings = false
     
     // Core Data取得
     @FetchRequest(
@@ -41,6 +42,19 @@ struct HistoryStatsView: View {
             }
             .navigationTitle("履歴・統計")
             .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        isShowingSettings = true
+                    }) {
+                        Image(systemName: "gearshape")
+                            .foregroundColor(.brown)
+                    }
+                }
+            }
+            .sheet(isPresented: $isShowingSettings) {
+                SettingsView()
+            }
             .onAppear {
                 loadUserData()
             }

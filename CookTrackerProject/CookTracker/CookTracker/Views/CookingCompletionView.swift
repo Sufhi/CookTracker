@@ -84,8 +84,6 @@ struct CookingCompletionView: View {
                         newLevel: newLevel,
                         onComplete: {
                             isShowingLevelUpAnimation = false
-                            // レベルアップ後にバッジチェック
-                            checkForBadges()
                         }
                     )
                 }
@@ -386,9 +384,6 @@ struct CookingCompletionView: View {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     isShowingLevelUpAnimation = true
                 }
-            } else {
-                // レベルアップしなかった場合は直接バッジチェック
-                checkForBadges()
             }
         }
         
