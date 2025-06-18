@@ -10,6 +10,7 @@ struct CookingRecordDetailView: View {
     // MARK: - Properties
     let cookingRecord: CookingRecord
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.managedObjectContext) private var viewContext
     @State private var selectedPhotoIndex: Int = 0
     @State private var isShowingPhotoGallery = false
     
@@ -400,8 +401,7 @@ struct CookingRecordDetailView: View {
     }
     
     private func getCookingSequence() -> Int {
-        guard let record = cookingRecord,
-              let recipe = record.recipe,
+        guard let recipe = cookingRecord.recipe,
               let recipeId = recipe.id else {
             return 1
         }
@@ -409,7 +409,7 @@ struct CookingRecordDetailView: View {
         let request: NSFetchRequest<CookingRecord> = CookingRecord.fetchRequest()
         request.predicate = NSPredicate(format: "recipeId == %@ AND cookedAt <= %@", 
                                        recipeId as CVarArg, 
-                                       record.cookedAt ?? Date())
+                                       cookingRecord.cookedAt as CVarArg? ?? Date() as CVarArg)
         request.sortDescriptors = [NSSortDescriptor(keyPath: \CookingRecord.cookedAt, ascending: true)]
         
         do {
