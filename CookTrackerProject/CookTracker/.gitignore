@@ -130,4 +130,5 @@ $RECYCLE.BIN/
 # Project specific
 CookTracker.sqlite
 CookTracker.sqlite-shm
-CookTracker.sqlite-wal
+CookTracker.sqlite-wal.DS_Store
+*.xcuserstate
