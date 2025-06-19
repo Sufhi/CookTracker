@@ -75,11 +75,11 @@ struct PersistenceController {
         storeDescription?.setOption(true as NSNumber, forKey: NSPersistentHistoryTrackingKey)
         storeDescription?.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
         
-        container.loadPersistentStores { _, error in
+        container.loadPersistentStores { [container] _, error in
             if let error = error as NSError? {
                 AppLogger.coreDataError("Core Data読み込み", error: error)
                 // フォールバック処理: インメモリストアに切り替え
-                self.handleCoreDataLoadError(error)
+                Self.handleCoreDataLoadErrorStatic(container: container, error: error)
             } else {
                 AppLogger.coreDataSuccess("Core Data初期化")
             }
@@ -148,6 +148,28 @@ struct PersistenceController {
     }
     
     // MARK: - Private Methods
+    
+    /// Core Data読み込みエラー時のフォールバック処理（静的版）
+    private static func handleCoreDataLoadErrorStatic(container: NSPersistentContainer, error: NSError) {
+        AppLogger.warning("Core Data初期化に失敗しました。インメモリストアでアプリを継続します。")
+        
+        // 既存のストアを削除してインメモリストアで再試行
+        let storeDescription = NSPersistentStoreDescription()
+        storeDescription.type = NSInMemoryStoreType
+        storeDescription.shouldMigrateStoreAutomatically = false
+        
+        container.persistentStoreDescriptions = [storeDescription]
+        
+        container.loadPersistentStores { _, fallbackError in
+            if let fallbackError = fallbackError {
+                AppLogger.error("インメモリストア初期化も失敗", error: fallbackError)
+                // 最後の手段として最小限のデータモデルで続行
+                AppLogger.warning("最小限の機能でアプリを継続します。")
+            } else {
+                AppLogger.coreDataSuccess("インメモリストアで初期化")
+            }
+        }
+    }
     
     /// Core Data読み込みエラー時のフォールバック処理
     private func handleCoreDataLoadError(_ error: NSError) {

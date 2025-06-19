@@ -63,7 +63,7 @@ struct RecipeListView: View {
                 }
             }
             .sheet(isPresented: $isShowingAddRecipe) {
-                CoreDataAddRecipeView()
+                RecipeFormView()
             }
             .sheet(item: $selectedRecipe) { recipe in
                 CoreDataRecipeDetailView(recipe: recipe)
@@ -160,84 +160,6 @@ struct RecipeListView: View {
     }
 }
 
-// MARK: - Core Data Recipe Row View
-struct CoreDataRecipeRowView: View {
-    let recipe: Recipe
-    let onTap: () -> Void
-    @State private var isShowingEditSheet = false
-    
-    var body: some View {
-        Button(action: onTap) {
-            HStack(spacing: 16) {
-                // レシピ画像プレースホルダー
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.brown.opacity(0.1))
-                    .frame(width: 80, height: 80)
-                    .overlay(
-                        Image(systemName: "fork.knife")
-                            .font(.system(size: 24))
-                            .foregroundColor(.brown.opacity(0.6))
-                    )
-                
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(recipe.title ?? "無題のレシピ")
-                        .font(.headline)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.primary)
-                        .lineLimit(1)
-                    
-                    HStack {
-                        Label("\(Int(recipe.estimatedTimeInMinutes))分", systemImage: "clock")
-                        
-                        Spacer()
-                        
-                        HStack(spacing: 2) {
-                            ForEach(0..<5) { index in
-                                Image(systemName: index < Int(recipe.difficulty) ? "star.fill" : "star")
-                                    .font(.caption)
-                                    .foregroundColor(index < Int(recipe.difficulty) ? .brown : .gray.opacity(0.3))
-                            }
-                        }
-                    }
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    
-                    Text(recipe.category ?? "食事")
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .foregroundColor(.brown)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 2)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.brown.opacity(0.1))
-                        )
-                }
-                
-                Spacer()
-                
-                // 編集ボタン
-                Button(action: {
-                    isShowingEditSheet = true
-                }) {
-                    Image(systemName: "pencil.circle.fill")
-                        .font(.title2)
-                        .foregroundColor(.blue)
-                }
-                .buttonStyle(.plain)
-                
-                Image(systemName: "chevron.right")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-            .padding(.vertical, 8)
-        }
-        .buttonStyle(.plain)
-        .sheet(isPresented: $isShowingEditSheet) {
-            CoreDataEditRecipeView(recipe: recipe)
-        }
-    }
-}
 
 // MARK: - Sample Recipe Model
 struct SampleRecipe: Identifiable {
@@ -358,18 +280,6 @@ struct RecipeDetailView: View {
                         dismiss()
                     }
                 }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(cookingSession.isRunning ? "調理中" : "調理開始") {
-                        if !cookingSession.isRunning {
-                            isShowingCookingView = true
-                        }
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.small)
-                    .tint(cookingSession.isRunning ? .orange : .brown)
-                    .disabled(cookingSession.isRunning)
-                }
             }
             .sheet(isPresented: $isShowingCookingView) {
                 CookingSessionView(
@@ -444,204 +354,93 @@ struct SimpleAddRecipeView: View {
     }
 }
 
-// MARK: - Core Data Add Recipe View
-struct CoreDataAddRecipeView: View {
-    @Environment(\.dismiss) private var dismiss
-    @Environment(\.managedObjectContext) private var viewContext
-    @State private var title = ""
-    @State private var ingredients = ""
-    @State private var instructions = ""
-    @State private var category = "食事"
-    @State private var difficulty: Double = 2
-    @State private var estimatedTime: Double = 20
-    @State private var url = ""
-    
-    var body: some View {
-        NavigationView {
-            Form {
-                Section("基本情報") {
-                    TextField("レシピ名", text: $title)
-                    
-                    Picker("カテゴリ", selection: $category) {
-                        Text("食事").tag("食事")
-                        Text("デザート").tag("デザート")
-                        Text("おつまみ").tag("おつまみ")
-                    }
-                    
-                    VStack(alignment: .leading) {
-                        Text("難易度: \(Int(difficulty))")
-                        Slider(value: $difficulty, in: 1...5, step: 1)
-                    }
-                    
-                    VStack(alignment: .leading) {
-                        Text("予想時間: \(Int(estimatedTime))分")
-                        Slider(value: $estimatedTime, in: 5...120, step: 5)
-                    }
-                }
-                
-                Section("材料") {
-                    TextEditor(text: $ingredients)
-                        .frame(minHeight: 100)
-                }
-                
-                Section("作り方") {
-                    TextEditor(text: $instructions)
-                        .frame(minHeight: 100)
-                }
-                
-                Section("URL（任意）") {
-                    TextField("レシピのURL", text: $url)
-                        .keyboardType(.URL)
-                }
-                
-                Section {
-                    Button("レシピを追加") {
-                        saveRecipe()
-                    }
-                    .disabled(title.isEmpty || ingredients.isEmpty)
-                }
-            }
-            .navigationTitle("レシピ追加")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("キャンセル") {
-                        dismiss()
-                    }
-                }
-            }
-        }
-    }
-    
-    private func saveRecipe() {
-        let newRecipe = Recipe(context: viewContext)
-        newRecipe.id = UUID()
-        newRecipe.title = title
-        newRecipe.ingredients = ingredients
-        newRecipe.instructions = instructions
-        newRecipe.category = category
-        newRecipe.difficulty = Int32(difficulty)
-        newRecipe.estimatedTimeInMinutes = Int32(estimatedTime)
-        newRecipe.url = url.isEmpty ? nil : url
-        newRecipe.createdAt = Date()
-        newRecipe.updatedAt = Date()
-        
-        PersistenceController.shared.save()
-        dismiss()
-    }
-}
-
-// MARK: - Core Data Edit Recipe View
-struct CoreDataEditRecipeView: View {
-    let recipe: Recipe
-    @Environment(\.dismiss) private var dismiss
-    @Environment(\.managedObjectContext) private var viewContext
-    
-    @State private var title: String
-    @State private var ingredients: String
-    @State private var instructions: String
-    @State private var category: String
-    @State private var difficulty: Double
-    @State private var estimatedTime: Double
-    @State private var url: String
-    
-    init(recipe: Recipe) {
-        self.recipe = recipe
-        _title = State(initialValue: recipe.title ?? "")
-        _ingredients = State(initialValue: recipe.ingredients ?? "")
-        _instructions = State(initialValue: recipe.instructions ?? "")
-        _category = State(initialValue: recipe.category ?? "食事")
-        _difficulty = State(initialValue: Double(recipe.difficulty))
-        _estimatedTime = State(initialValue: Double(recipe.estimatedTimeInMinutes))
-        _url = State(initialValue: recipe.url ?? "")
-    }
-    
-    var body: some View {
-        NavigationView {
-            Form {
-                Section("基本情報") {
-                    TextField("レシピ名", text: $title)
-                    
-                    Picker("カテゴリ", selection: $category) {
-                        Text("食事").tag("食事")
-                        Text("デザート").tag("デザート")
-                        Text("おつまみ").tag("おつまみ")
-                    }
-                    
-                    VStack(alignment: .leading) {
-                        Text("難易度: \(Int(difficulty))")
-                        Slider(value: $difficulty, in: 1...5, step: 1)
-                    }
-                    
-                    VStack(alignment: .leading) {
-                        Text("予想時間: \(Int(estimatedTime))分")
-                        Slider(value: $estimatedTime, in: 5...120, step: 5)
-                    }
-                }
-                
-                Section("材料") {
-                    TextEditor(text: $ingredients)
-                        .frame(minHeight: 100)
-                }
-                
-                Section("作り方") {
-                    TextEditor(text: $instructions)
-                        .frame(minHeight: 100)
-                }
-                
-                Section("URL（任意）") {
-                    TextField("レシピのURL", text: $url)
-                        .keyboardType(.URL)
-                }
-                
-                Section {
-                    Button("変更を保存") {
-                        saveRecipe()
-                    }
-                    .disabled(title.isEmpty || ingredients.isEmpty)
-                }
-            }
-            .navigationTitle("レシピ編集")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("キャンセル") {
-                        dismiss()
-                    }
-                }
-            }
-        }
-    }
-    
-    private func saveRecipe() {
-        recipe.title = title
-        recipe.ingredients = ingredients
-        recipe.instructions = instructions
-        recipe.category = category
-        recipe.difficulty = Int32(difficulty)
-        recipe.estimatedTimeInMinutes = Int32(estimatedTime)
-        recipe.url = url.isEmpty ? nil : url
-        recipe.updatedAt = Date()
-        
-        PersistenceController.shared.save()
-        dismiss()
-    }
-}
 
 // MARK: - Core Data Recipe Detail View
 struct CoreDataRecipeDetailView: View {
     let recipe: Recipe
     @Environment(\.dismiss) private var dismiss
     @Environment(\.managedObjectContext) private var viewContext
-    @StateObject private var cookingSession = CookingSessionTimer()
+    @EnvironmentObject private var sessionManager: CookingSessionManager
     @State private var isShowingCookingView = false
     @State private var isShowingEditView = false
     @State private var currentUser: User?
+    @State private var selectedCookingRecord: CookingRecord?
+    @State private var isShowingFullHistory = false
+    @State private var isShowingImagePicker = false
+    @State private var selectedThumbnailImage: UIImage?
+    
+    // このレシピの調理記録を取得
+    var cookingRecords: [CookingRecord] {
+        guard let recipeId = recipe.id else { return [] }
+        
+        let request: NSFetchRequest<CookingRecord> = CookingRecord.fetchRequest()
+        request.predicate = NSPredicate(format: "recipeId == %@", recipeId as CVarArg)
+        request.sortDescriptors = [NSSortDescriptor(keyPath: \CookingRecord.cookedAt, ascending: false)]
+        
+        do {
+            return try viewContext.fetch(request)
+        } catch {
+            AppLogger.coreDataError("調理履歴取得", error: error)
+            return []
+        }
+    }
+    
+    // 改善メモのある調理記録を取得
+    var improvementNotes: [CookingRecord] {
+        return cookingRecords.filter { record in
+            guard let notes = record.notes, !notes.isEmpty else { return false }
+            return true
+        }
+    }
     
     var body: some View {
         NavigationView {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
+                    // 調理中の場合は調理中カード、そうでなければ調理開始ボタンを表示
+                    if sessionManager.isCurrentlyCooking {
+                        CookingSessionActiveCard(onSessionTap: {
+                            isShowingCookingView = true
+                        })
+                    } else {
+                        // 調理開始ボタン（おしゃれなデザイン）
+                        Button(action: {
+                            let _ = sessionManager.startCookingSession(for: recipe)
+                            isShowingCookingView = true
+                        }) {
+                            HStack(spacing: 12) {
+                                // アイコン
+                                Image(systemName: "play.circle.fill")
+                                    .font(.system(size: 20, weight: .semibold))
+                                    .foregroundColor(.white)
+                                
+                                // テキスト
+                                Text("調理を開始する")
+                                    .font(.headline)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.white)
+                                
+                                Spacer()
+                                
+                                // 右側のアイコン
+                                Image(systemName: "arrow.right")
+                                    .font(.system(size: 16, weight: .semibold))
+                                    .foregroundColor(.white.opacity(0.8))
+                            }
+                            .padding(.horizontal, 24)
+                            .padding(.vertical, 16)
+                            .background(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [Color.brown.opacity(0.8), Color.brown]),
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                            .shadow(color: Color.brown.opacity(0.3), radius: 8, x: 0, y: 4)
+                        }
+                    }
+                    
                     // ヘッダー情報
                     VStack(alignment: .leading, spacing: 12) {
                         Text(recipe.title ?? "無題のレシピ")
@@ -727,37 +526,35 @@ struct CoreDataRecipeDetailView: View {
                         dismiss()
                     }
                 }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(cookingSession.isRunning ? "調理中" : "調理開始") {
-                        if !cookingSession.isRunning {
-                            isShowingCookingView = true
-                        }
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.small)
-                    .tint(cookingSession.isRunning ? .orange : .brown)
-                    .disabled(cookingSession.isRunning)
-                }
             }
             .sheet(isPresented: $isShowingCookingView) {
-                CoreDataCookingSessionView(
-                    recipe: recipe,
-                    cookingSession: cookingSession,
-                    helperTimer: nil,
-                    user: currentUser
-                ) { record in
-                    print("✅ 調理記録保存: \(record.formattedCookingTime)")
+                if let currentRecipe = sessionManager.currentRecipe,
+                   let currentSession = sessionManager.currentSession {
+                    CookingSessionView(
+                        recipe: RecipeConverter.toSampleRecipe(currentRecipe),
+                        cookingSession: currentSession,
+                        onCookingComplete: { sampleRecord in
+                            print("✅ 調理記録保存: \(sampleRecord.formattedActualTime)")
+                            sessionManager.finishCookingSession()
+                        },
+                        helperTimer: sessionManager.sharedHelperTimer
+                    )
                 }
             }
             .sheet(isPresented: $isShowingEditView) {
-                CoreDataEditRecipeView(recipe: recipe)
+                RecipeFormView(recipe: recipe)
             }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
                         Button("編集", action: {
                             isShowingEditView = true
+                        })
+                        
+                        Divider()
+                        
+                        Button("サムネイル選択", action: {
+                            isShowingImagePicker = true
                         })
                     } label: {
                         Image(systemName: "ellipsis.circle")
@@ -767,7 +564,223 @@ struct CoreDataRecipeDetailView: View {
             .onAppear {
                 currentUser = PersistenceController.shared.getOrCreateDefaultUser()
             }
+            .sheet(item: $selectedCookingRecord) { record in
+                CookingRecordDetailView(cookingRecord: record)
+            }
+            .sheet(isPresented: $isShowingFullHistory) {
+                RecipeCookingHistoryView(recipe: recipe)
+            }
+            .sheet(isPresented: $isShowingImagePicker) {
+                ImagePicker(
+                    selectedImage: $selectedThumbnailImage,
+                    hasCurrentImage: recipe.hasThumbnail,
+                    onSave: { image in
+                        saveThumbnail(image)
+                    }
+                )
+            }
         }
+    }
+    
+    private func saveThumbnail(_ image: UIImage?) {
+        if let image = image {
+            // 画像を保存
+            if recipe.saveThumbnailImage(image) {
+                do {
+                    try viewContext.save()
+                    print("✅ サムネイル保存成功")
+                } catch {
+                    print("❌ サムネイル保存エラー: \(error)")
+                }
+            }
+        } else {
+            // 画像を削除
+            recipe.deleteThumbnailImage()
+            do {
+                try viewContext.save()
+                print("✅ サムネイル削除成功")
+            } catch {
+                print("❌ サムネイル削除エラー: \(error)")
+            }
+        }
+        selectedThumbnailImage = nil
+    }
+    
+    
+    // MARK: - View Components
+    @ViewBuilder
+    private var improvementNotesSection: some View {
+        if !improvementNotes.isEmpty {
+            Divider()
+            
+            VStack(alignment: .leading, spacing: 16) {
+                HStack {
+                    Text("改善メモ")
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                    
+                    Spacer()
+                    
+                    Text("\(improvementNotes.count)件")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                
+                VStack(spacing: 12) {
+                    ForEach(improvementNotes.prefix(3), id: \.id) { record in
+                        improvementNoteRow(record: record)
+                    }
+                    
+                    if improvementNotes.count > 3 {
+                        Button("すべての改善メモを表示 (\(improvementNotes.count)件)") {
+                            isShowingFullHistory = true
+                        }
+                        .font(.caption)
+                        .foregroundColor(.brown)
+                    }
+                }
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private func improvementNoteRow(record: CookingRecord) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            // メモ内容
+            Text(record.notes ?? "")
+                .font(.body)
+                .foregroundColor(.primary)
+            
+            // 記入日時
+            if let cookedAt = record.cookedAt {
+                Text(formatDetailedDate(cookedAt))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color(.systemGray6))
+        )
+    }
+    
+    @ViewBuilder
+    private var cookingHistorySection: some View {
+        if !cookingRecords.isEmpty {
+            Divider()
+            
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Text("調理履歴")
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                    
+                    Spacer()
+                    
+                    Text("\(cookingRecords.count)回")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                
+                LazyVStack(spacing: 8) {
+                    ForEach(cookingRecords.prefix(5), id: \.id) { record in
+                        cookingHistoryRow(record: record)
+                    }
+                    
+                    if cookingRecords.count > 5 {
+                        Button("すべて表示 (\(cookingRecords.count)件)") {
+                            isShowingFullHistory = true
+                        }
+                        .font(.caption)
+                        .foregroundColor(.brown)
+                    }
+                }
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private func cookingHistoryRow(record: CookingRecord) -> some View {
+        Button(action: {
+            selectedCookingRecord = record
+        }) {
+            HStack(spacing: 12) {
+                // 調理日のアイコン
+                Circle()
+                    .fill(Color.brown.opacity(0.2))
+                    .frame(width: 40, height: 40)
+                    .overlay(
+                        Text("\(Calendar.current.component(.day, from: record.cookedAt ?? Date()))")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.brown)
+                    )
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack {
+                        Text(formatDate(record.cookedAt ?? Date()))
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                        
+                        Spacer()
+                        
+                        Text("\(Int(record.cookingTimeInMinutes))分")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    if let notes = record.notes, !notes.isEmpty {
+                        Text(notes.prefix(30) + (notes.count > 30 ? "..." : ""))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+                    }
+                    
+                    HStack {
+                        Text("+\(Int(record.experienceGained)) XP")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.brown)
+                        
+                        if hasPhotos(record) {
+                            Image(systemName: "photo")
+                                .font(.caption)
+                                .foregroundColor(.brown)
+                        }
+                    }
+                }
+                
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            .padding(.vertical, 8)
+            .padding(.horizontal, 12)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color(.systemGray6))
+            )
+        }
+        .buttonStyle(.plain)
+    }
+    
+    // MARK: - Helper Methods
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MM/dd HH:mm"
+        return formatter.string(from: date)
+    }
+    
+    private func formatDetailedDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy年M月d日 HH:mm"
+        return formatter.string(from: date)
+    }
+    
+    private func hasPhotos(_ record: CookingRecord) -> Bool {
+        guard let photoPaths = record.photoPaths as? [String] else { return false }
+        return !photoPaths.isEmpty
     }
 }
 

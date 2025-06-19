@@ -1,6 +1,7 @@
 // MARK: - Imports
 import CoreData
 import Foundation
+import UIKit
 
 // MARK: - Recipe Extension
 extension Recipe {
@@ -57,6 +58,52 @@ extension Recipe {
     var validURL: URL? {
         guard let urlString = url, !urlString.isEmpty else { return nil }
         return URL(string: urlString)
+    }
+    
+    /// サムネイル画像の有無チェック
+    var hasThumbnail: Bool {
+        guard let thumbnailPath = thumbnailImagePath, !thumbnailPath.isEmpty else { return false }
+        return FileManager.default.fileExists(atPath: thumbnailPath)
+    }
+    
+    /// サムネイル画像のUIImage
+    var thumbnailImage: UIImage? {
+        guard let thumbnailPath = thumbnailImagePath, !thumbnailPath.isEmpty else { return nil }
+        return UIImage(contentsOfFile: thumbnailPath)
+    }
+    
+    /// ドキュメントディレクトリのパスを取得
+    static var documentsDirectory: URL {
+        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    }
+    
+    /// サムネイル画像を保存
+    func saveThumbnailImage(_ image: UIImage) -> Bool {
+        guard let data = image.jpegData(compressionQuality: 0.8) else { return false }
+        
+        let fileName = "\(id?.uuidString ?? UUID().uuidString)_thumbnail.jpg"
+        let fileURL = Recipe.documentsDirectory.appendingPathComponent(fileName)
+        
+        do {
+            try data.write(to: fileURL)
+            self.thumbnailImagePath = fileURL.path
+            return true
+        } catch {
+            print("サムネイル保存エラー: \(error)")
+            return false
+        }
+    }
+    
+    /// サムネイル画像を削除
+    func deleteThumbnailImage() {
+        guard let thumbnailPath = thumbnailImagePath, !thumbnailPath.isEmpty else { return }
+        
+        do {
+            try FileManager.default.removeItem(atPath: thumbnailPath)
+            self.thumbnailImagePath = nil
+        } catch {
+            print("サムネイル削除エラー: \(error)")
+        }
     }
 }
 

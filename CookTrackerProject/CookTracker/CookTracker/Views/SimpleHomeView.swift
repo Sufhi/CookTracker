@@ -12,8 +12,8 @@ struct SimpleHomeView: View {
     @State private var isShowingAddRecipe = false
     @State private var isShowingTimer = false
     @State private var isShowingCookingSession = false
-    @StateObject private var cookingSession = CookingSessionTimer()
-    @StateObject private var helperTimer = CookingTimer()
+    @State private var isShowingSettings = false
+    @EnvironmentObject private var sessionManager: CookingSessionManager
     @State private var currentUser: User?
     
     // Core Data取得
@@ -32,13 +32,14 @@ struct SimpleHomeView: View {
     
     /// 調理セッションボタンのテキスト
     private var cookingSessionButtonText: String {
-        if cookingSession.isRunning {
-            return "調理中"
-        } else if cookingSession.isPaused {
-            return "調理再開"
-        } else {
-            return "調理セッション開始"
+        if let session = sessionManager.currentSession {
+            if session.isRunning {
+                return "調理中"
+            } else if session.isPaused {
+                return "調理再開"
+            }
         }
+        return "調理セッション開始"
     }
     
     /// 推奨レシピ（最初のレシピまたはデフォルト）
@@ -63,40 +64,51 @@ struct SimpleHomeView: View {
         return currentUser?.progressToNextLevel ?? 0.0
     }
     
+    /// 調理統計データ
+    private var cookingStatsData: CookingStatsData {
+        let records = Array(recentCookingRecords)
+        return CookingStatsData(records: records)
+    }
+    
     // MARK: - Body
     var body: some View {
         VStack(spacing: 0) {
             // 固定表示エリア
             VStack(spacing: 8) {
                 // 調理セッション中カード（固定表示）
-                if cookingSession.isRunning || cookingSession.isPaused {
-                    cookingSessionActiveCard
-                        .padding(.horizontal)
-                        .padding(.top, 8)
-                        .transition(.move(edge: .top).combined(with: .opacity))
-                        .animation(.easeInOut(duration: 0.3), value: cookingSession.isRunning)
+                if sessionManager.isCurrentlyCooking {
+                    CookingSessionActiveCard(onSessionTap: {
+                        isShowingCookingSession = true
+                    })
+                    .padding(.horizontal)
+                    .padding(.top, 8)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .animation(.easeInOut(duration: 0.3), value: sessionManager.currentSession?.isRunning)
                 }
                 
                 // 補助タイマーカード（動作中・一時停止中に表示）
-                if helperTimer.isRunning || (helperTimer.timeRemaining > 0 && !helperTimer.isRunning && !helperTimer.isFinished) {
+                if sessionManager.sharedHelperTimer.isRunning || (sessionManager.sharedHelperTimer.timeRemaining > 0 && !sessionManager.sharedHelperTimer.isRunning && !sessionManager.sharedHelperTimer.isFinished) {
                     helperTimerCompactCard
                         .padding(.horizontal)
                         .transition(.move(edge: .top).combined(with: .opacity))
-                        .animation(.easeInOut(duration: 0.3), value: helperTimer.isRunning)
+                        .animation(.easeInOut(duration: 0.3), value: sessionManager.sharedHelperTimer.isRunning)
                 }
             }
             .background(Color(.systemGroupedBackground))
             .shadow(color: .black.opacity(0.1), radius: 3, x: 0, y: 2)
-            .padding(.bottom, (cookingSession.isRunning || cookingSession.isPaused || helperTimer.isRunning || (helperTimer.timeRemaining > 0 && !helperTimer.isFinished)) ? 4 : 0)
+            .padding(.bottom, (sessionManager.isCurrentlyCooking || sessionManager.sharedHelperTimer.isRunning || (sessionManager.sharedHelperTimer.timeRemaining > 0 && !sessionManager.sharedHelperTimer.isFinished)) ? 4 : 0)
             
             // スクロール可能なメインコンテンツ
             ScrollView {
                 VStack(spacing: 20) {
+                    // 調理統計セクション
+                    cookingStatsSection
+                    
                     // ユーザー情報・レベル表示セクション
                     userInfoSection
                     
                     // 今日の調理提案セクション（調理中でない場合のみ表示）
-                    if !cookingSession.isRunning && !cookingSession.isPaused {
+                    if !sessionManager.isCurrentlyCooking {
                         todaysSuggestionSection
                     }
                     
@@ -112,21 +124,23 @@ struct SimpleHomeView: View {
         .navigationTitle("CookTracker")
         .navigationBarTitleDisplayMode(.large)
         .sheet(isPresented: $isShowingAddRecipe) {
-            AddRecipeSheetView()
+            RecipeFormView()
         }
         .sheet(isPresented: $isShowingTimer) {
-            CookingTimerView(timer: helperTimer)
+            CookingTimerView(timer: sessionManager.sharedHelperTimer)
         }
         .sheet(isPresented: $isShowingCookingSession) {
-            if let recipe = recommendedRecipe {
-                CoreDataCookingSessionView(
-                    recipe: recipe,
-                    cookingSession: cookingSession,
-                    helperTimer: helperTimer,
-                    user: currentUser
-                ) { record in
-                    print("✅ レシピ調理完了: \(record.formattedCookingTime)")
-                }
+            if let currentRecipe = sessionManager.currentRecipe,
+               let currentSession = sessionManager.currentSession {
+                CookingSessionView(
+                    recipe: RecipeConverter.toSampleRecipe(currentRecipe),
+                    cookingSession: currentSession,
+                    onCookingComplete: { sampleRecord in
+                        print("✅ 調理完了: \(sampleRecord.formattedActualTime)")
+                        sessionManager.finishCookingSession()
+                    },
+                    helperTimer: sessionManager.sharedHelperTimer
+                )
             }
         }
         .onAppear {
@@ -224,15 +238,15 @@ struct SimpleHomeView: View {
                         .foregroundColor(.secondary)
                     
                     // 調理セッション状態表示
-                    if cookingSession.isRunning || cookingSession.isPaused {
+                    if sessionManager.isCurrentlyCooking, let session = sessionManager.currentSession {
                         HStack {
                             Circle()
-                                .fill(cookingSession.isRunning ? .green : .orange)
+                                .fill(session.isRunning ? .green : .orange)
                                 .frame(width: 8, height: 8)
-                            Text("調理中: \(cookingSession.formattedElapsedTime)")
+                            Text("調理中: \(session.formattedElapsedTime)")
                                 .font(.caption)
                                 .fontWeight(.medium)
-                                .foregroundColor(cookingSession.isRunning ? .green : .orange)
+                                .foregroundColor(session.isRunning ? .green : .orange)
                         }
                     }
                 }
@@ -240,17 +254,20 @@ struct SimpleHomeView: View {
                 Spacer()
                 
                 Button(cookingSessionButtonText) {
-                    if cookingSession.isRunning || cookingSession.isPaused {
+                    if sessionManager.isCurrentlyCooking {
                         // 調理中の場合は調理セッション画面を開く
                         isShowingCookingSession = true
                     } else {
                         // 新規調理開始
-                        isShowingCookingSession = true
+                        if let recipe = recommendedRecipe {
+                            let _ = sessionManager.startCookingSession(for: recipe)
+                            isShowingCookingSession = true
+                        }
                     }
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.small)
-                .tint(cookingSession.isRunning || cookingSession.isPaused ? .orange : .brown)
+                .tint(sessionManager.isCurrentlyCooking ? .orange : .brown)
             }
             .padding()
             .background(
@@ -424,121 +441,6 @@ struct SimpleHomeView: View {
         .padding(.vertical, 4)
     }
     
-    @ViewBuilder
-    private var cookingSessionActiveCard: some View {
-        VStack(spacing: 16) {
-            HStack {
-                Image(systemName: "flame.fill")
-                    .foregroundColor(.orange)
-                    .font(.title2)
-                
-                Text("調理中")
-                    .font(.headline)
-                    .fontWeight(.bold)
-                    .foregroundColor(.orange)
-                
-                Spacer()
-                
-                // 状態インジケーター
-                HStack(spacing: 6) {
-                    Circle()
-                        .fill(cookingSession.isRunning ? .green : .orange)
-                        .frame(width: 8, height: 8)
-                    
-                    Text(cookingSession.statusText)
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .foregroundColor(.secondary)
-                }
-            }
-            
-            Divider()
-            
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(recommendedRecipe?.title ?? "レシピなし")
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.primary)
-                    
-                    Text("経過時間")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                
-                Spacer()
-                
-                VStack(alignment: .trailing, spacing: 4) {
-                    Text(cookingSession.formattedElapsedTime)
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.orange)
-                        .monospacedDigit()
-                    
-                    Text("予想: \(Int(recommendedRecipe?.estimatedTimeInMinutes ?? 15))分")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-            }
-            
-            // アクションボタン
-            HStack(spacing: 12) {
-                // 調理セッションに戻るボタン
-                Button(action: {
-                    isShowingCookingSession = true
-                }) {
-                    HStack {
-                        Image(systemName: "arrow.right.circle.fill")
-                        Text("セッションに戻る")
-                    }
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(Color.orange)
-                    )
-                }
-                .buttonStyle(.plain)
-                
-                // 一時停止/再開ボタン
-                Button(action: {
-                    if cookingSession.isRunning {
-                        cookingSession.pauseCooking()
-                    } else {
-                        cookingSession.startCooking()
-                    }
-                }) {
-                    HStack {
-                        Image(systemName: cookingSession.isRunning ? "pause.fill" : "play.fill")
-                        Text(cookingSession.isRunning ? "一時停止" : "再開")
-                    }
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .foregroundColor(.orange)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.orange, lineWidth: 1)
-                    )
-                }
-                .buttonStyle(.plain)
-            }
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.orange.opacity(0.08))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.orange.opacity(0.4), lineWidth: 1.5)
-                )
-        )
-    }
     
     @ViewBuilder
     private var helperTimerCompactCard: some View {
@@ -558,26 +460,26 @@ struct SimpleHomeView: View {
             Spacer()
             
             // 時間表示
-            Text(helperTimer.formattedTime)
+            Text(sessionManager.sharedHelperTimer.formattedTime)
                 .font(.system(size: 16, weight: .semibold, design: .monospaced))
                 .foregroundColor(.blue)
             
             // 状態インジケーター
             Circle()
-                .fill(helperTimer.isRunning ? .green : .orange)
+                .fill(sessionManager.sharedHelperTimer.isRunning ? .green : .orange)
                 .frame(width: 8, height: 8)
             
             // 操作ボタン
             HStack(spacing: 8) {
                 // 一時停止/再開ボタン
                 Button(action: {
-                    if helperTimer.isRunning {
-                        helperTimer.pauseTimer()
-                    } else if helperTimer.timeRemaining > 0 {
-                        helperTimer.resumeTimer()
+                    if sessionManager.sharedHelperTimer.isRunning {
+                        sessionManager.sharedHelperTimer.pauseTimer()
+                    } else if sessionManager.sharedHelperTimer.timeRemaining > 0 {
+                        sessionManager.sharedHelperTimer.resumeTimer()
                     }
                 }) {
-                    Image(systemName: helperTimer.isRunning ? "pause.fill" : "play.fill")
+                    Image(systemName: sessionManager.sharedHelperTimer.isRunning ? "pause.fill" : "play.fill")
                         .font(.system(size: 14))
                         .foregroundColor(.blue)
                         .frame(width: 24, height: 24)
@@ -587,7 +489,7 @@ struct SimpleHomeView: View {
                         )
                 }
                 .buttonStyle(.plain)
-                .disabled(helperTimer.timeRemaining == 0)
+                .disabled(sessionManager.sharedHelperTimer.timeRemaining == 0)
                 
                 // タイマー画面を開くボタン
                 Button(action: {
@@ -630,56 +532,80 @@ struct SimpleHomeView: View {
         formatter.dateFormat = "MM/dd"
         return formatter.string(from: date)
     }
-}
-
-// MARK: - Core Data Compatible Cooking Session View
-struct CoreDataCookingSessionView: View {
-    let recipe: Recipe
-    @ObservedObject var cookingSession: CookingSessionTimer
-    let helperTimer: CookingTimer?
-    let user: User?
-    let onCookingComplete: (CookingRecord) -> Void
     
-    @Environment(\.managedObjectContext) private var viewContext
-    
-    var body: some View {
-        CookingSessionView(
-            recipe: SampleRecipe(
-                id: recipe.id ?? UUID(),
-                title: recipe.title ?? "無題のレシピ",
-                ingredients: recipe.ingredients ?? "",
-                instructions: recipe.instructions ?? "",
-                category: recipe.category ?? "食事",
-                difficulty: Int(recipe.difficulty),
-                estimatedTime: Int(recipe.estimatedTimeInMinutes),
-                createdAt: recipe.createdAt ?? Date()
-            ),
-            cookingSession: cookingSession,
-            onCookingComplete:  { sampleRecord in
-                // Core Dataに保存
-                let record = CookingRecord(context: viewContext)
-                record.id = UUID()
-                record.recipeId = recipe.id
-                record.cookingTimeInMinutes = Int32(sampleRecord.actualMinutes)
-                record.experienceGained = 15
-                record.cookedAt = Date()
-                record.recipe = recipe
+    // MARK: - Cooking Stats Section
+    @ViewBuilder
+    private var cookingStatsSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            // セクションヘッダー
+            HStack {
+                Image(systemName: "chart.line.uptrend.xyaxis")
+                    .foregroundColor(.brown)
+                    .font(.title3)
                 
-                // ユーザーに経験値を追加
-                if let user = user {
-                    let leveledUp = user.addExperience(15)
-                    if leveledUp {
-                        AppLogger.levelUp(newLevel: Int(user.level), totalXP: Int(user.experiencePoints))
+                Text("調理の継続状況")
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.brown)
+                
+                Spacer()
+            }
+            
+            // 継続メッセージ
+            if cookingStatsData.totalDays > 0 {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(cookingStatsData.continuityMessage)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(.primary)
+                    
+                    if cookingStatsData.currentStreak > 0 {
+                        Text("現在\(cookingStatsData.currentStreak)日連続で調理中です！")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                     }
                 }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 10)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.brown.opacity(0.1))
+                )
+            }
+            
+            // 統計グリッド
+            LazyVGrid(columns: [
+                GridItem(.flexible()),
+                GridItem(.flexible())
+            ], spacing: 12) {
+                // 総調理日数
+                StatCard(
+                    icon: "calendar.circle.fill",
+                    iconColor: Color.blue,
+                    title: "総調理日数",
+                    value: "\(cookingStatsData.totalDays)日",
+                    subtitle: "累計\(cookingStatsData.totalRecords)回調理"
+                )
                 
-                // Core Dataを保存
-                PersistenceController.shared.save()
-                
-                onCookingComplete(record)
-            }, helperTimer: helperTimer)
+                // 現在の連続日数
+                StatCard(
+                    icon: "flame.circle.fill",
+                    iconColor: cookingStatsData.currentStreak > 0 ? Color.orange : Color.gray,
+                    title: "連続調理",
+                    value: "\(cookingStatsData.currentStreak)日",
+                    subtitle: "最高\(cookingStatsData.longestStreak)日"
+                )
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(.systemBackground))
+                .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
+        )
     }
 }
+
 
 // MARK: - Sheet Views
 struct AddRecipeSheetView: View {

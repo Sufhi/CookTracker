@@ -10,6 +10,7 @@ class CookingSessionTimer: ObservableObject {
     
     // MARK: - Published Properties
     @Published var elapsedTime: TimeInterval = 0    // 経過時間（秒）
+    @Published var formattedElapsedTime: String = "00:00"  // フォーマット済み経過時間
     @Published var isRunning = false                // 調理中フラグ
     @Published var isPaused = false                 // 一時停止フラグ
     
@@ -20,20 +21,6 @@ class CookingSessionTimer: ObservableObject {
     private var lastPauseDate: Date?
     
     // MARK: - Computed Properties
-    
-    /// フォーマット済み経過時間（HH:MM:SS または MM:SS）
-    var formattedElapsedTime: String {
-        let totalSeconds = Int(elapsedTime)
-        let hours = totalSeconds / 3600
-        let minutes = (totalSeconds % 3600) / 60
-        let seconds = totalSeconds % 60
-        
-        if hours > 0 {
-            return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
-        } else {
-            return String(format: "%02d:%02d", minutes, seconds)
-        }
-    }
     
     /// 経過時間（分単位）
     var elapsedMinutes: Int {
@@ -62,6 +49,7 @@ class CookingSessionTimer: ObservableObject {
         if !isPaused {
             // 新規調理開始
             elapsedTime = 0
+            formattedElapsedTime = "00:00"
             pausedDuration = 0
             startDate = Date()
         } else {
@@ -126,6 +114,7 @@ class CookingSessionTimer: ObservableObject {
         timer = nil
         
         elapsedTime = 0
+        formattedElapsedTime = "00:00"
         pausedDuration = 0
         isRunning = false
         isPaused = false
@@ -143,9 +132,26 @@ class CookingSessionTimer: ObservableObject {
             
             // 開始時からの総経過時間 - 一時停止累積時間
             let totalElapsed = Date().timeIntervalSince(startDate)
+            
+            // プロパティを更新（@Publishedなので自動的にUIが更新される）
             self.elapsedTime = totalElapsed - self.pausedDuration
             
-            self.objectWillChange.send()
+            // フォーマット済み時間も更新
+            let totalSeconds = Int(self.elapsedTime)
+            let hours = totalSeconds / 3600
+            let minutes = (totalSeconds % 3600) / 60
+            let seconds = totalSeconds % 60
+            
+            if hours > 0 {
+                self.formattedElapsedTime = String(format: "%02d:%02d:%02d", hours, minutes, seconds)
+            } else {
+                self.formattedElapsedTime = String(format: "%02d:%02d", minutes, seconds)
+            }
+            
+            // デバッグログ（3秒おきに出力）
+            if Int(self.elapsedTime) % 3 == 0 && Int(self.elapsedTime) > 0 {
+                print("⏱️ CookingSessionTimer: 経過時間更新 - \(self.formattedElapsedTime), isRunning: \(self.isRunning)")
+            }
         }
     }
 }

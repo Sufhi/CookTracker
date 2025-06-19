@@ -13,7 +13,7 @@ struct HistoryStatsView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @State private var selectedTab = 0
     @State private var currentUser: User?
-    @StateObject private var badgeSystem = BadgeSystem.shared
+    @State private var isShowingSettings = false
     
     // Core Data取得
     @FetchRequest(
@@ -37,15 +37,24 @@ struct HistoryStatsView: View {
                     // 統計タブ
                     statsTabView
                         .tag(1)
-                    
-                    // バッジタブ
-                    badgeTabView
-                        .tag(2)
                 }
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
             }
             .navigationTitle("履歴・統計")
             .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        isShowingSettings = true
+                    }) {
+                        Image(systemName: "gearshape")
+                            .foregroundColor(.brown)
+                    }
+                }
+            }
+            .sheet(isPresented: $isShowingSettings) {
+                SettingsView()
+            }
             .onAppear {
                 loadUserData()
             }
@@ -110,7 +119,11 @@ struct HistoryStatsView: View {
             VStack(spacing: 20) {
                 if let user = currentUser {
                     // ユーザー統計カード
-                    UserStatsCard(user: user, totalRecords: cookingRecords.count)
+                    UserStatsCard(
+                        user: user, 
+                        totalRecords: cookingRecords.count,
+                        cookingRecords: Array(cookingRecords)
+                    )
                     
                     // 調理統計
                     CookingStatsSection(records: Array(cookingRecords))
@@ -126,19 +139,6 @@ struct HistoryStatsView: View {
         }
     }
     
-    @ViewBuilder
-    private var badgeTabView: some View {
-        ScrollView {
-            VStack(spacing: 20) {
-                if let user = currentUser {
-                    BadgeListView(user: user)
-                } else {
-                    Text("データを読み込み中...")
-                        .foregroundColor(.secondary)
-                }
-            }
-        }
-    }
     
     @ViewBuilder
     private var emptyHistoryView: some View {
@@ -188,7 +188,7 @@ struct HistoryStatsView: View {
         var currentDate = calendar.startOfDay(for: Date())
         
         // 昨日から逆順にチェック
-        var checkDate = calendar.date(byAdding: .day, value: -1, to: currentDate)!
+        var checkDate = calendar.date(byAdding: .day, value: -1, to: currentDate)
         
         while let checkingDate = checkDate {
             let startOfDay = calendar.startOfDay(for: checkingDate)
@@ -214,13 +214,12 @@ struct HistoryStatsView: View {
 
 // MARK: - Tab Type
 enum TabType: CaseIterable {
-    case history, stats, badges
+    case history, stats
     
     var title: String {
         switch self {
         case .history: return "履歴"
         case .stats: return "統計"
-        case .badges: return "バッジ"
         }
     }
     
@@ -228,7 +227,6 @@ enum TabType: CaseIterable {
         switch self {
         case .history: return "clock"
         case .stats: return "chart.bar"
-        case .badges: return "trophy"
         }
     }
 }
@@ -350,6 +348,7 @@ struct HistoryRecordRow: View {
 struct UserStatsCard: View {
     let user: User
     let totalRecords: Int
+    let cookingRecords: [CookingRecord]
     
     var body: some View {
         VStack(spacing: 16) {
@@ -409,7 +408,7 @@ struct UserStatsCard: View {
                 StatItemView(
                     icon: "calendar",
                     title: "連続記録",
-                    value: "\(calculateConsecutiveDays())日"
+                    value: "\(CookingStats.currentStreakDays(from: Array(cookingRecords)))日"
                 )
             }
         }
