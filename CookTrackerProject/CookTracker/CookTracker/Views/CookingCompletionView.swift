@@ -27,7 +27,7 @@ struct CookingCompletionView: View {
     @State private var isShowingLevelUpAnimation = false
     @State private var leveledUp = false
     @State private var newLevel: Int = 1
-    @State private var experienceGained: Int = 15
+    @State private var experienceGained: Int = 0
     
     // MARK: - Body
     var body: some View {
@@ -331,9 +331,17 @@ struct CookingCompletionView: View {
                         .stroke(Color.brown.opacity(0.3), lineWidth: 1)
                 )
         )
+        .onAppear {
+            initializeExperience()
+        }
     }
     
     // MARK: - Methods
+    
+    /// 経験値の初期表示を設定
+    private func initializeExperience() {
+        experienceGained = ExperienceService.shared.calculateExperience(for: recipe)
+    }
     
     /// 選択した写真を読み込み
     private func loadSelectedPhotos() {
@@ -361,29 +369,40 @@ struct CookingCompletionView: View {
     
     /// 完全な記録を保存（写真・メモ含む）
     private func saveCompletionRecord() {
-        let record = createCookingRecord()
+        let hasPhotos = !photoImages.isEmpty
+        let hasNotes = !notes.isEmpty
         
-        // 写真を保存（実装簡略化のため、パスのみ保存）
-        if !photoImages.isEmpty {
+        // ExperienceServiceを使用して記録作成と経験値付与を一括処理
+        let (record, didLevelUp, actualExperience) = ExperienceService.shared.createCookingRecordWithExperience(
+            context: viewContext,
+            recipe: recipe,
+            cookingTime: cookingRecord.actualMinutes,
+            hasPhotos: hasPhotos,
+            hasNotes: hasNotes,
+            user: user
+        )
+        
+        // 実際の経験値を更新
+        experienceGained = actualExperience
+        
+        // 写真を保存
+        if hasPhotos {
             let photoPaths = savePhotos()
             record.photoPaths = photoPaths as NSObject
         }
         
         // メモを保存
-        if !notes.isEmpty {
+        if hasNotes {
             record.notes = notes
         }
         
-        // 経験値を追加
-        if let user = user {
-            let didLevelUp = user.addExperience(Int32(experienceGained))
-            if didLevelUp {
-                leveledUp = true
-                newLevel = Int(user.level)
-                // レベルアップアニメーション表示
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    isShowingLevelUpAnimation = true
-                }
+        // レベルアップ処理
+        if didLevelUp {
+            leveledUp = true
+            newLevel = Int(user?.level ?? 1)
+            // レベルアップアニメーション表示
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                isShowingLevelUpAnimation = true
             }
         }
         

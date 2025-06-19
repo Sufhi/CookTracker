@@ -279,6 +279,9 @@ struct TimePickerView: View {
 struct TimerCompletionView: View {
     let onDismiss: () -> Void
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.managedObjectContext) private var viewContext
+    @State private var isShowingRecordCreation = false
+    @State private var currentUser: User?
     
     var body: some View {
         NavigationView {
@@ -312,7 +315,7 @@ struct TimerCompletionView: View {
                 
                 VStack(spacing: 12) {
                     Button("調理記録を追加") {
-                        // 将来実装：調理記録画面への遷移
+                        createBasicCookingRecord()
                         onDismiss()
                         dismiss()
                     }
@@ -342,6 +345,30 @@ struct TimerCompletionView: View {
                     }
                 }
             }
+        }
+        .onAppear {
+            loadUserData()
+        }
+    }
+    
+    private func loadUserData() {
+        currentUser = PersistenceController.shared.getOrCreateDefaultUser()
+    }
+    
+    private func createBasicCookingRecord() {
+        // ExperienceServiceを使用して基本調理記録を作成
+        let (record, didLevelUp, experience) = ExperienceService.shared.createBasicCookingRecord(
+            context: viewContext,
+            user: currentUser
+        )
+        
+        // 保存
+        PersistenceController.shared.save()
+        
+        if didLevelUp {
+            AppLogger.success("基本調理記録保存完了 & レベルアップ！: +\(experience) XP")
+        } else {
+            AppLogger.success("基本調理記録保存完了: +\(experience) XP")
         }
     }
 }

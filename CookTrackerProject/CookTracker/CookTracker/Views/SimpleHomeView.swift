@@ -14,7 +14,6 @@ struct SimpleHomeView: View {
     @State private var isShowingCookingSession = false
     @State private var isShowingSettings = false
     @EnvironmentObject private var sessionManager: CookingSessionManager
-    @State private var currentUser: User?
     
     // Core Data取得
     @FetchRequest(
@@ -47,22 +46,6 @@ struct SimpleHomeView: View {
         return suggestedRecipes.first
     }
     
-    /// ユーザー情報の取得
-    private var userLevel: Int {
-        return Int(currentUser?.level ?? 1)
-    }
-    
-    private var userExperience: Int {
-        return Int(currentUser?.experiencePoints ?? 0)
-    }
-    
-    private var userExperienceToNext: Int {
-        return Int(currentUser?.experienceToNextLevel ?? 150)
-    }
-    
-    private var userProgress: Double {
-        return currentUser?.progressToNextLevel ?? 0.0
-    }
     
     /// 調理統計データ
     private var cookingStatsData: CookingStatsData {
@@ -105,7 +88,7 @@ struct SimpleHomeView: View {
                     cookingStatsSection
                     
                     // ユーザー情報・レベル表示セクション
-                    userInfoSection
+                    UserStatusCard.forHome()
                     
                     // 今日の調理提案セクション（調理中でない場合のみ表示）
                     if !sessionManager.isCurrentlyCooking {
@@ -143,67 +126,9 @@ struct SimpleHomeView: View {
                 )
             }
         }
-        .onAppear {
-            loadUserData()
-        }
     }
     
     // MARK: - View Components
-    @ViewBuilder
-    private var userInfoSection: some View {
-        VStack(spacing: 12) {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("レベル \(userLevel)")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.brown)
-                    
-                    Text("経験値: \(userExperience) XP")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
-                
-                Spacer()
-                
-                VStack(alignment: .trailing, spacing: 4) {
-                    Text("次のレベルまで")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    
-                    Text("\(userExperienceToNext) XP")
-                        .font(.headline)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.brown)
-                }
-            }
-            
-            // 経験値プログレスバー
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    Text("レベル \(userLevel)")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    
-                    Spacer()
-                    
-                    Text("レベル \(userLevel + 1)")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                
-                ProgressView(value: userProgress, total: 1.0)
-                    .progressViewStyle(LinearProgressViewStyle(tint: .brown))
-                    .scaleEffect(x: 1, y: 2, anchor: .center)
-            }
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemBackground))
-                .shadow(color: .gray.opacity(0.2), radius: 4, x: 0, y: 2)
-        )
-    }
     
     @ViewBuilder
     private var todaysSuggestionSection: some View {
@@ -520,11 +445,6 @@ struct SimpleHomeView: View {
     }
     
     // MARK: - Methods
-    
-    /// ユーザーデータの読み込み
-    private func loadUserData() {
-        currentUser = PersistenceController.shared.getOrCreateDefaultUser()
-    }
     
     /// 日付フォーマット
     private func formatDate(_ date: Date) -> String {

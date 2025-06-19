@@ -12,7 +12,6 @@ struct HistoryStatsView: View {
     // MARK: - Properties
     @Environment(\.managedObjectContext) private var viewContext
     @State private var selectedTab = 0
-    @State private var currentUser: User?
     @State private var isShowingSettings = false
     
     // Core Data取得
@@ -54,9 +53,6 @@ struct HistoryStatsView: View {
             }
             .sheet(isPresented: $isShowingSettings) {
                 SettingsView()
-            }
-            .onAppear {
-                loadUserData()
             }
         }
     }
@@ -117,23 +113,17 @@ struct HistoryStatsView: View {
     private var statsTabView: some View {
         ScrollView {
             VStack(spacing: 20) {
-                if let user = currentUser {
-                    // ユーザー統計カード
-                    UserStatsCard(
-                        user: user, 
-                        totalRecords: cookingRecords.count,
-                        cookingRecords: Array(cookingRecords)
-                    )
-                    
-                    // 調理統計
-                    CookingStatsSection(records: Array(cookingRecords))
-                    
-                    // 月間カレンダー
-                    MonthlyCalendarView(records: Array(cookingRecords))
-                } else {
-                    Text("データを読み込み中...")
-                        .foregroundColor(.secondary)
-                }
+                // ユーザー統計カード
+                UserStatusCard.forStats(
+                    totalRecords: cookingRecords.count,
+                    cookingRecords: Array(cookingRecords)
+                )
+                
+                // 調理統計
+                CookingStatsSection(records: Array(cookingRecords))
+                
+                // 月間カレンダー
+                MonthlyCalendarView(records: Array(cookingRecords))
             }
             .padding()
         }
@@ -171,9 +161,6 @@ struct HistoryStatsView: View {
     }
     
     // MARK: - Methods
-    private func loadUserData() {
-        currentUser = PersistenceController.shared.getOrCreateDefaultUser()
-    }
     
     /// 連続調理日数を計算
     private func calculateConsecutiveDays() -> Int {
@@ -344,108 +331,6 @@ struct HistoryRecordRow: View {
     }
 }
 
-// MARK: - User Stats Card
-struct UserStatsCard: View {
-    let user: User
-    let totalRecords: Int
-    let cookingRecords: [CookingRecord]
-    
-    var body: some View {
-        VStack(spacing: 16) {
-            // ユーザーレベル情報
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("レベル \(Int(user.level))")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.brown)
-                    
-                    Text("経験値: \(Int(user.experiencePoints)) XP")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
-                
-                Spacer()
-                
-                // レベルアップ進捗
-                VStack(alignment: .trailing, spacing: 4) {
-                    Text("次のレベルまで")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    
-                    Text("\(Int(user.experienceToNextLevel)) XP")
-                        .font(.headline)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.brown)
-                }
-            }
-            
-            // 進捗バー
-            ProgressView(value: user.progressToNextLevel, total: 1.0)
-                .progressViewStyle(LinearProgressViewStyle(tint: .brown))
-                .scaleEffect(x: 1, y: 2, anchor: .center)
-            
-            Divider()
-            
-            // 統計情報
-            HStack {
-                StatItemView(
-                    icon: "fork.knife",
-                    title: "総調理回数",
-                    value: "\(totalRecords)回"
-                )
-                
-                Spacer()
-                
-                StatItemView(
-                    icon: "trophy.fill",
-                    title: "獲得バッジ",
-                    value: "\((user.badges as? Set<Badge>)?.count ?? 0)個"
-                )
-                
-                Spacer()
-                
-                StatItemView(
-                    icon: "calendar",
-                    title: "連続記録",
-                    value: "\(CookingStats.currentStreakDays(from: Array(cookingRecords)))日"
-                )
-            }
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemBackground))
-                .shadow(color: .gray.opacity(0.2), radius: 4, x: 0, y: 2)
-        )
-    }
-}
-
-// MARK: - Stat Item View
-struct StatItemView: View {
-    let icon: String
-    let title: String
-    let value: String
-    
-    var body: some View {
-        VStack(spacing: 8) {
-            Image(systemName: icon)
-                .font(.title2)
-                .foregroundColor(.brown)
-            
-            Text(title)
-                .font(.caption)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-            
-            Text(value)
-                .font(.subheadline)
-                .fontWeight(.semibold)
-                .foregroundColor(.primary)
-        }
-        .frame(maxWidth: .infinity)
-    }
-}
 
 // MARK: - Cooking Stats Section
 struct CookingStatsSection: View {
