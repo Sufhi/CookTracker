@@ -18,8 +18,19 @@ extension User {
         let progressXP = experiencePoints - currentLevelXP
         let totalNeededXP = nextLevelXP - currentLevelXP
         
+        // NaN防止: 分母が0または負数の場合
         guard totalNeededXP > 0 else { return 1.0 }
-        return Double(progressXP) / Double(totalNeededXP)
+        
+        // 進捗XPが負数の場合も防止
+        guard progressXP >= 0 else { return 0.0 }
+        
+        let progress = Double(progressXP) / Double(totalNeededXP)
+        
+        // NaN、無限大をチェック
+        guard progress.isFinite else { return 0.0 }
+        
+        // 0.0-1.0の範囲に制限
+        return max(0.0, min(1.0, progress))
     }
     
     /// レベルに必要な経験値を計算

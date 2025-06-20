@@ -120,6 +120,21 @@ struct SimpleHomeView: View {
                     cookingSession: currentSession,
                     onCookingComplete: { sampleRecord in
                         print("✅ 調理完了: \(sampleRecord.formattedActualTime)")
+                        
+                        // 調理記録を Core Data に保存して経験値を付与
+                        let currentUser = PersistenceController.shared.getOrCreateDefaultUser()
+                        let (_, didLevelUp, experience) = ExperienceService.shared.createCookingRecordWithExperience(
+                            context: viewContext,
+                            recipe: currentRecipe,
+                            cookingTime: sampleRecord.actualMinutes,
+                            user: currentUser
+                        )
+                        
+                        // Core Data保存
+                        PersistenceController.shared.save()
+                        
+                        print("🎉 経験値獲得: +\(experience) XP, レベルアップ: \(didLevelUp)")
+                        
                         sessionManager.finishCookingSession()
                     },
                     helperTimer: sessionManager.sharedHelperTimer
