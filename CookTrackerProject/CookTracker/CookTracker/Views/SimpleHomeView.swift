@@ -29,17 +29,6 @@ struct SimpleHomeView: View {
     
     // MARK: - Computed Properties
     
-    /// 調理セッションボタンのテキスト
-    private var cookingSessionButtonText: String {
-        if let session = sessionManager.currentSession {
-            if session.isRunning {
-                return "調理中"
-            } else if session.isPaused {
-                return "調理再開"
-            }
-        }
-        return "調理セッション開始"
-    }
     
     /// 推奨レシピ（最初のレシピまたはデフォルト）
     private var recommendedRecipe: Recipe? {
@@ -71,7 +60,7 @@ struct SimpleHomeView: View {
                 
                 // 補助タイマーカード（動作中・一時停止中に表示）
                 if sessionManager.sharedHelperTimer.isRunning || (sessionManager.sharedHelperTimer.timeRemaining > 0 && !sessionManager.sharedHelperTimer.isRunning && !sessionManager.sharedHelperTimer.isFinished) {
-                    helperTimerCompactCard
+                    HelperTimerCompactCard(isShowingTimer: $isShowingTimer)
                         .padding(.horizontal)
                         .transition(.move(edge: .top).combined(with: .opacity))
                         .animation(.easeInOut(duration: 0.3), value: sessionManager.sharedHelperTimer.isRunning)
@@ -92,11 +81,17 @@ struct SimpleHomeView: View {
                     
                     // 今日の調理提案セクション（調理中でない場合のみ表示）
                     if !sessionManager.isCurrentlyCooking {
-                        todaysSuggestionSection
+                        TodaysSuggestionSection(
+                            recommendedRecipe: recommendedRecipe,
+                            isShowingCookingSession: $isShowingCookingSession
+                        )
                     }
                     
                     // クイックアクションボタンセクション
-                    quickActionSection
+                    QuickActionSection(
+                        isShowingAddRecipe: $isShowingAddRecipe,
+                        isShowingTimer: $isShowingTimer
+                    )
                     
                     // 最近の料理履歴セクション
                     recentHistorySection
@@ -145,163 +140,7 @@ struct SimpleHomeView: View {
     
     // MARK: - View Components
     
-    @ViewBuilder
-    private var todaysSuggestionSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Image(systemName: "lightbulb.fill")
-                    .foregroundColor(.yellow)
-                Text("今日の調理提案")
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                
-                Spacer()
-            }
-            
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(recommendedRecipe?.title ?? "レシピなし")
-                        .font(.title3)
-                        .fontWeight(.medium)
-                    
-                    HStack {
-                        ForEach(0..<Int(recommendedRecipe?.difficulty ?? 1), id: \.self) { _ in
-                            Text("⭐")
-                        }
-                        Text("難易度")
-                    }
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    
-                    Text("予想時間: \(Int(recommendedRecipe?.estimatedTimeInMinutes ?? 15))分")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    
-                    // 調理セッション状態表示
-                    if sessionManager.isCurrentlyCooking, let session = sessionManager.currentSession {
-                        HStack {
-                            Circle()
-                                .fill(session.isRunning ? .green : .orange)
-                                .frame(width: 8, height: 8)
-                            Text("調理中: \(session.formattedElapsedTime)")
-                                .font(.caption)
-                                .fontWeight(.medium)
-                                .foregroundColor(session.isRunning ? .green : .orange)
-                        }
-                    }
-                }
-                
-                Spacer()
-                
-                Button(cookingSessionButtonText) {
-                    if sessionManager.isCurrentlyCooking {
-                        // 調理中の場合は調理セッション画面を開く
-                        isShowingCookingSession = true
-                    } else {
-                        // 新規調理開始
-                        if let recipe = recommendedRecipe {
-                            let _ = sessionManager.startCookingSession(for: recipe)
-                            isShowingCookingSession = true
-                        }
-                    }
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.small)
-                .tint(sessionManager.isCurrentlyCooking ? .orange : .brown)
-            }
-            .padding()
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.brown.opacity(0.1))
-            )
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemBackground))
-                .shadow(color: .gray.opacity(0.2), radius: 4, x: 0, y: 2)
-        )
-    }
     
-    @ViewBuilder
-    private var quickActionSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("クイックアクション")
-                .font(.headline)
-                .fontWeight(.semibold)
-            
-            HStack(spacing: 12) {
-                Button(action: {
-                    isShowingAddRecipe = true
-                }) {
-                    VStack(spacing: 8) {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.system(size: 30))
-                            .foregroundColor(.brown)
-                        
-                        Text("レシピ追加")
-                            .font(.caption)
-                            .fontWeight(.medium)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(Color.brown.opacity(0.1))
-                    )
-                }
-                .buttonStyle(.plain)
-                
-                Button(action: {
-                    isShowingTimer = true
-                }) {
-                    VStack(spacing: 8) {
-                        Image(systemName: "timer")
-                            .font(.system(size: 30))
-                            .foregroundColor(.brown)
-                        
-                        Text("補助タイマー")
-                            .font(.caption)
-                            .fontWeight(.medium)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(Color.brown.opacity(0.1))
-                    )
-                }
-                .buttonStyle(.plain)
-                
-                Button(action: {
-                    // レシピ一覧は後で実装
-                }) {
-                    VStack(spacing: 8) {
-                        Image(systemName: "book.fill")
-                            .font(.system(size: 30))
-                            .foregroundColor(.brown)
-                        
-                        Text("レシピ一覧")
-                            .font(.caption)
-                            .fontWeight(.medium)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(Color.brown.opacity(0.1))
-                    )
-                }
-                .buttonStyle(.plain)
-            }
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemBackground))
-                .shadow(color: .gray.opacity(0.2), radius: 4, x: 0, y: 2)
-        )
-    }
     
     @ViewBuilder
     private var recentHistorySection: some View {
@@ -382,82 +221,6 @@ struct SimpleHomeView: View {
     }
     
     
-    @ViewBuilder
-    private var helperTimerCompactCard: some View {
-        HStack(spacing: 12) {
-            // タイマーアイコンと状態
-            HStack(spacing: 6) {
-                Image(systemName: "timer")
-                    .foregroundColor(.blue)
-                    .font(.system(size: 16))
-                
-                Text("補助タイマー")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .foregroundColor(.blue)
-            }
-            
-            Spacer()
-            
-            // 時間表示
-            Text(sessionManager.sharedHelperTimer.formattedTime)
-                .font(.system(size: 16, weight: .semibold, design: .monospaced))
-                .foregroundColor(.blue)
-            
-            // 状態インジケーター
-            Circle()
-                .fill(sessionManager.sharedHelperTimer.isRunning ? .green : .orange)
-                .frame(width: 8, height: 8)
-            
-            // 操作ボタン
-            HStack(spacing: 8) {
-                // 一時停止/再開ボタン
-                Button(action: {
-                    if sessionManager.sharedHelperTimer.isRunning {
-                        sessionManager.sharedHelperTimer.pauseTimer()
-                    } else if sessionManager.sharedHelperTimer.timeRemaining > 0 {
-                        sessionManager.sharedHelperTimer.resumeTimer()
-                    }
-                }) {
-                    Image(systemName: sessionManager.sharedHelperTimer.isRunning ? "pause.fill" : "play.fill")
-                        .font(.system(size: 14))
-                        .foregroundColor(.blue)
-                        .frame(width: 24, height: 24)
-                        .background(
-                            Circle()
-                                .fill(Color.blue.opacity(0.1))
-                        )
-                }
-                .buttonStyle(.plain)
-                .disabled(sessionManager.sharedHelperTimer.timeRemaining == 0)
-                
-                // タイマー画面を開くボタン
-                Button(action: {
-                    isShowingTimer = true
-                }) {
-                    Image(systemName: "arrow.up.right.square")
-                        .font(.system(size: 14))
-                        .foregroundColor(.blue)
-                        .frame(width: 24, height: 24)
-                        .background(
-                            Circle()
-                                .fill(Color.blue.opacity(0.1))
-                        )
-                }
-                .buttonStyle(.plain)
-            }
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(Color.blue.opacity(0.05))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.blue.opacity(0.3), lineWidth: 1)
-                )
-        )
-    }
     
     // MARK: - Methods
     
@@ -543,41 +306,6 @@ struct SimpleHomeView: View {
 
 
 // MARK: - Sheet Views
-struct AddRecipeSheetView: View {
-    @Environment(\.dismiss) private var dismiss
-    
-    var body: some View {
-        NavigationView {
-            VStack {
-                Image(systemName: "plus.circle.fill")
-                    .font(.system(size: 60))
-                    .foregroundColor(.brown.opacity(0.5))
-                
-                Text("レシピ追加")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                    .padding(.top)
-                
-                Text("この機能は次のフェーズで実装予定です")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding()
-                
-                Spacer()
-            }
-            .navigationTitle("レシピ追加")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("キャンセル") {
-                        dismiss()
-                    }
-                }
-            }
-        }
-    }
-}
 
 
 // MARK: - Preview
