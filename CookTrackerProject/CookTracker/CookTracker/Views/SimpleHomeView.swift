@@ -30,9 +30,10 @@ struct SimpleHomeView: View {
     // MARK: - Computed Properties
     
     
-    /// 推奨レシピ（最初のレシピまたはデフォルト）
+    /// 推奨レシピ（ランダム選択）
     private var recommendedRecipe: Recipe? {
-        return suggestedRecipes.first
+        guard !suggestedRecipes.isEmpty else { return nil }
+        return suggestedRecipes.randomElement()
     }
     
     

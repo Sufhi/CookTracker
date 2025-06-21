@@ -98,7 +98,7 @@ struct CoreDataRecipeDetailView: View {
                             .fontWeight(.bold)
                         
                         HStack {
-                            Label("\\(Int(recipe.estimatedTimeInMinutes))分", systemImage: "clock")
+                            Label("\(Int(recipe.estimatedTimeInMinutes))分", systemImage: "clock")
                             
                             Spacer()
                             

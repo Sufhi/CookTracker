@@ -76,7 +76,7 @@ struct PhotoManagementView: View {
                 .buttonStyle(.plain)
             }
             
-            Text("最大20枚まで保存できます（現在: \\(photoImages.count)/20）")
+            Text("最大20枚まで保存できます（現在: \(photoImages.count)/20）")
                 .font(.caption)
                 .foregroundColor(.secondary)
         }
