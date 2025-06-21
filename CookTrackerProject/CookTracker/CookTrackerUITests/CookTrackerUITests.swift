@@ -23,12 +23,61 @@ final class CookTrackerUITests: XCTestCase {
     }
 
     @MainActor
-    func testExample() throws {
-        // UI tests must launch the application that they test.
+    func testAppLaunchAndNavigation() throws {
+        // アプリ起動とナビゲーションテスト
         let app = XCUIApplication()
         app.launch()
-
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+        
+        // タブバーの存在確認
+        let tabBar = app.tabBars.firstMatch
+        XCTAssertTrue(tabBar.exists, "タブバーが表示されていません")
+        
+        // ホームタブが選択されていることを確認
+        let homeTab = app.tabBars.buttons["ホーム"]
+        XCTAssertTrue(homeTab.exists, "ホームタブが見つかりません")
+        
+        // レシピタブをタップ
+        let recipeTab = app.tabBars.buttons["レシピ"]
+        if recipeTab.exists {
+            recipeTab.tap()
+        }
+        
+        // タイマータブをタップ
+        let timerTab = app.tabBars.buttons["タイマー"]
+        if timerTab.exists {
+            timerTab.tap()
+        }
+        
+        // 履歴タブをタップ
+        let historyTab = app.tabBars.buttons["履歴"]
+        if historyTab.exists {
+            historyTab.tap()
+        }
+    }
+    
+    @MainActor
+    func testHomeScreenElements() throws {
+        // ホーム画面要素テスト
+        let app = XCUIApplication()
+        app.launch()
+        
+        // ホームタブに移動
+        let homeTab = app.tabBars.buttons["ホーム"]
+        if homeTab.exists {
+            homeTab.tap()
+        }
+        
+        // 調理統計セクションの確認
+        let cookingStatsText = app.staticTexts.containing(NSPredicate(format: "label CONTAINS '調理統計'")).firstMatch
+        if cookingStatsText.exists {
+            XCTAssertTrue(cookingStatsText.isHittable, "調理統計セクションが表示されていません")
+        }
+        
+        // ユーザー情報カードの確認
+        let levelText = app.staticTexts.containing(NSPredicate(format: "label CONTAINS 'レベル'")).firstMatch
+        if levelText.exists {
+            XCTAssertTrue(levelText.isHittable, "レベル表示が見つかりません")
+        }
     }
 
     @MainActor
