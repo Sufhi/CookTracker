@@ -28,7 +28,7 @@ class CookingSessionManager: ObservableObject {
     func startCookingSession(for recipe: Recipe) -> CookingSessionTimer {
         // 既存のセッションがある場合は停止
         if let existingSession = currentSession {
-            existingSession.finishCooking()
+            _ = existingSession.finishCooking()
         }
         
         // 既存の購読をクリア
@@ -58,7 +58,7 @@ class CookingSessionManager: ObservableObject {
     
     /// 調理セッションを終了
     func finishCookingSession() {
-        currentSession?.finishCooking()
+        _ = currentSession?.finishCooking()
         currentSession = nil
         currentRecipe = nil
         

@@ -172,7 +172,7 @@ struct HistoryStatsView: View {
         
         let calendar = Calendar.current
         var consecutiveDays = 0
-        var currentDate = calendar.startOfDay(for: Date())
+        let currentDate = calendar.startOfDay(for: Date())
         
         // 昨日から逆順にチェック
         var checkDate = calendar.date(byAdding: .day, value: -1, to: currentDate)

@@ -357,7 +357,7 @@ struct TimerCompletionView: View {
     
     private func createBasicCookingRecord() {
         // ExperienceServiceを使用して基本調理記録を作成
-        let (record, didLevelUp, experience) = ExperienceService.shared.createBasicCookingRecord(
+        let (_, didLevelUp, experience) = ExperienceService.shared.createBasicCookingRecord(
             context: viewContext,
             user: currentUser
         )
