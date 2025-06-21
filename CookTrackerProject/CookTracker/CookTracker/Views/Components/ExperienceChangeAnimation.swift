@@ -88,11 +88,11 @@ struct ExperienceChangeAnimation: View {
     }
     
     private var levelUpColors: [Color] {
-        [.purple.opacity(0.8), .blue.opacity(0.6), .clear]
+        [.purple, .blue, .indigo]
     }
     
     private var experienceColors: [Color] {
-        [.brown.opacity(0.7), .orange.opacity(0.5), .clear]
+        [.brown, .orange, .yellow.opacity(0.8)]
     }
     
     // MARK: - Main Icon
@@ -286,10 +286,8 @@ struct ExperienceChangeAnimation: View {
     
     // MARK: - Animation Sequence
     private func startAnimation() {
-        // 1. 背景表示
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            showBackground = true
-        }
+        // 1. 背景表示（即座に）
+        showBackground = true
         
         // 2. メインアイコン表示
         DispatchQueue.main.asyncAfter(deadline: .now() + delayBetweenSteps) {

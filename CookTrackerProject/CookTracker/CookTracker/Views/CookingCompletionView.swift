@@ -22,8 +22,6 @@ struct CookingCompletionView: View {
     // UI State
     @State private var photoImages: [UIImage] = []
     @State private var notes = ""
-    @State private var isShowingExperienceAnimation = false
-    @State private var experienceAnimationData: (gained: Int, didLevelUp: Bool, oldLevel: Int, newLevel: Int)?
     
     // MARK: - Body
     var body: some View {
@@ -63,22 +61,6 @@ struct CookingCompletionView: View {
                         saveRecord()
                     }
                     .fontWeight(.semibold)
-                    .disabled(photoImages.isEmpty && notes.isEmpty)
-                }
-            }
-            .fullScreenCover(isPresented: $isShowingExperienceAnimation) {
-                if let animationData = experienceAnimationData {
-                    ExperienceChangeAnimation(
-                        experienceGained: animationData.gained,
-                        didLevelUp: animationData.didLevelUp,
-                        oldLevel: animationData.oldLevel,
-                        newLevel: animationData.newLevel,
-                        context: .cooking
-                    ) {
-                        isShowingExperienceAnimation = false
-                        onComplete(createFinalCookingRecord())
-                        dismiss()
-                    }
                 }
             }
         }
@@ -224,7 +206,11 @@ struct CookingCompletionView: View {
     
     /// 調理記録を保存して経験値アニメーションを表示
     private func saveRecord() {
+        print("💾 CookingCompletionView: saveRecord開始")
+        print("💾 CookingCompletionView: user = \(user != nil ? "存在" : "nil")")
+        
         guard let user = user else {
+            print("⚠️ CookingCompletionView: userがnilのため直接保存")
             // ユーザーがいない場合は直接保存
             onComplete(createFinalCookingRecord())
             dismiss()
@@ -239,23 +225,22 @@ struct CookingCompletionView: View {
             hasNotes: !notes.isEmpty
         )
         
+        print("💾 CookingCompletionView: 経験値計算 - 獲得: \(experienceGained), 旧レベル: \(oldLevel)")
+        
         // 経験値付与とレベルアップ判定
         let didLevelUp = user.addExperience(Int32(experienceGained))
         let newLevel = Int(user.level)
         
+        print("💾 CookingCompletionView: 経験値付与完了 - レベルアップ: \(didLevelUp), 新レベル: \(newLevel)")
+        
         // Core Data保存
         PersistenceController.shared.save()
         
-        // アニメーションデータを設定
-        experienceAnimationData = (
-            gained: experienceGained,
-            didLevelUp: didLevelUp,
-            oldLevel: oldLevel,
-            newLevel: newLevel
-        )
+        print("💾 CookingCompletionView: 経験値処理完了 - 獲得: \(experienceGained), レベルアップ: \(didLevelUp)")
         
-        // 経験値アニメーション表示
-        isShowingExperienceAnimation = true
+        // 調理記録を保存して直接完了
+        onComplete(createFinalCookingRecord())
+        dismiss()
     }
     
     /// 最終的なCookingRecord作成
