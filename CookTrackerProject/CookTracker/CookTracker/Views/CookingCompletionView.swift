@@ -22,10 +22,8 @@ struct CookingCompletionView: View {
     // UI State
     @State private var photoImages: [UIImage] = []
     @State private var notes = ""
-    @State private var isShowingLevelUpAnimation = false
-    @State private var leveledUp = false
-    @State private var newLevel: Int = 1
-    @State private var experienceGained: Int = 0
+    @State private var isShowingExperienceAnimation = false
+    @State private var experienceAnimationData: (gained: Int, didLevelUp: Bool, oldLevel: Int, newLevel: Int)?
     
     // MARK: - Body
     var body: some View {
@@ -44,8 +42,8 @@ struct CookingCompletionView: View {
                     // メモセクション
                     notesSection
                     
-                    // 経験値・レベル表示
-                    experienceSection
+                    // 保存ボタン
+                    saveButtonSection
                     
                     Spacer(minLength: 100)
                 }
@@ -56,26 +54,31 @@ struct CookingCompletionView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("後で") {
-                        saveBasicRecord()
+                        dismiss()
                     }
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("保存") {
-                        saveCompletionRecord()
+                        saveRecord()
                     }
                     .fontWeight(.semibold)
                     .disabled(photoImages.isEmpty && notes.isEmpty)
                 }
             }
-            .overlay {
-                if isShowingLevelUpAnimation {
-                    LevelUpAnimationView(
-                        newLevel: newLevel,
-                        onComplete: {
-                            isShowingLevelUpAnimation = false
-                        }
-                    )
+            .fullScreenCover(isPresented: $isShowingExperienceAnimation) {
+                if let animationData = experienceAnimationData {
+                    ExperienceChangeAnimation(
+                        experienceGained: animationData.gained,
+                        didLevelUp: animationData.didLevelUp,
+                        oldLevel: animationData.oldLevel,
+                        newLevel: animationData.newLevel,
+                        context: .cooking
+                    ) {
+                        isShowingExperienceAnimation = false
+                        onComplete(createFinalCookingRecord())
+                        dismiss()
+                    }
                 }
             }
         }
@@ -184,175 +187,117 @@ struct CookingCompletionView: View {
     }
     
     @ViewBuilder
-    private var experienceSection: some View {
+    private var saveButtonSection: some View {
         VStack(spacing: 16) {
-            Text("獲得経験値")
+            // 保存ボタン
+            Button(action: {
+                saveRecord()
+            }) {
+                HStack {
+                    Image(systemName: "checkmark.circle.fill")
+                    Text("調理記録を保存")
+                }
                 .font(.headline)
                 .fontWeight(.semibold)
-            
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("基本経験値")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    
-                    Text("+\(experienceGained) XP")
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.brown)
-                }
-                
-                Spacer()
-                
-                if leveledUp {
-                    VStack(alignment: .trailing, spacing: 4) {
-                        Text("レベルアップ！")
-                            .font(.caption)
-                            .foregroundColor(.orange)
-                        
-                        Text("Lv.\(newLevel)")
-                            .font(.title3)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.orange)
-                    }
-                }
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 16)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.brown)
+                )
             }
             
-            if let user = user {
-                VStack(spacing: 8) {
-                    HStack {
-                        Text("現在のレベル: \(Int(user.level))")
-                        Spacer()
-                        Text("経験値: \(Int(user.experiencePoints)) XP")
-                    }
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    
-                    ProgressView(value: user.progressToNextLevel, total: 1.0)
-                        .progressViewStyle(LinearProgressViewStyle(tint: .brown))
-                        .scaleEffect(x: 1, y: 2, anchor: .center)
-                }
+            // 後で保存ボタン
+            Button(action: {
+                dismiss()
+            }) {
+                Text("後で保存")
+                    .font(.subheadline)
+                    .foregroundColor(.brown)
             }
         }
         .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.brown.opacity(0.05))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.brown.opacity(0.3), lineWidth: 1)
-                )
-        )
-        .onAppear {
-            initializeExperience()
-        }
     }
     
     // MARK: - Methods
     
-    /// 経験値の初期表示を設定
-    private func initializeExperience() {
-        experienceGained = ExperienceService.shared.calculateExperience(for: recipe)
-    }
-    
-    
-    /// 基本記録のみ保存（写真・メモなし）
-    private func saveBasicRecord() {
-        let record = createCookingRecord()
-        onComplete(record)
-        dismiss()
-    }
-    
-    /// 完全な記録を保存（写真・メモ含む）
-    private func saveCompletionRecord() {
-        let hasPhotos = !photoImages.isEmpty
-        let hasNotes = !notes.isEmpty
+    /// 調理記録を保存して経験値アニメーションを表示
+    private func saveRecord() {
+        guard let user = user else {
+            // ユーザーがいない場合は直接保存
+            onComplete(createFinalCookingRecord())
+            dismiss()
+            return
+        }
         
-        // ExperienceServiceを使用して記録作成と経験値付与を一括処理
-        let (record, didLevelUp, actualExperience) = ExperienceService.shared.createCookingRecordWithExperience(
-            context: viewContext,
-            recipe: recipe,
-            cookingTime: cookingRecord.actualMinutes,
-            hasPhotos: hasPhotos,
-            hasNotes: hasNotes,
-            user: user
+        // 経験値計算
+        let oldLevel = Int(user.level)
+        let experienceGained = ExperienceService.shared.calculateExperience(
+            for: nil,
+            hasPhotos: !photoImages.isEmpty,
+            hasNotes: !notes.isEmpty
         )
         
-        // 実際の経験値を更新
-        experienceGained = actualExperience
+        // 経験値付与とレベルアップ判定
+        let didLevelUp = user.addExperience(Int32(experienceGained))
+        let newLevel = Int(user.level)
         
-        // 写真を保存
-        if hasPhotos {
-            let photoPaths = savePhotos()
-            record.photoPaths = photoPaths as NSObject
-        }
-        
-        // メモを保存
-        if hasNotes {
-            record.notes = notes
-        }
-        
-        // レベルアップ処理
-        if didLevelUp {
-            leveledUp = true
-            newLevel = Int(user?.level ?? 1)
-            // レベルアップアニメーション表示
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                isShowingLevelUpAnimation = true
-            }
-        }
-        
+        // Core Data保存
         PersistenceController.shared.save()
-        onComplete(record)
         
-        // アニメーション表示されない場合は即座に閉じる
-        if !leveledUp {
-            dismiss()
-        } else {
-            // レベルアップアニメーション後に閉じる
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                dismiss()
-            }
-        }
+        // アニメーションデータを設定
+        experienceAnimationData = (
+            gained: experienceGained,
+            didLevelUp: didLevelUp,
+            oldLevel: oldLevel,
+            newLevel: newLevel
+        )
+        
+        // 経験値アニメーション表示
+        isShowingExperienceAnimation = true
     }
     
-    /// CookingRecord作成
-    private func createCookingRecord() -> CookingRecord {
+    /// 最終的なCookingRecord作成
+    private func createFinalCookingRecord() -> CookingRecord {
         let record = CookingRecord(context: viewContext)
         record.id = UUID()
+        record.recipe = recipe
         record.recipeId = recipe.id
         record.cookingTimeInMinutes = Int32(cookingRecord.actualMinutes)
-        record.experienceGained = Int32(experienceGained)
-        record.cookedAt = Date()
-        record.recipe = recipe
+        record.experienceGained = Int32(ExperienceService.shared.calculateExperience(
+            for: nil,
+            hasPhotos: !photoImages.isEmpty,
+            hasNotes: !notes.isEmpty
+        ))
+        record.cookedAt = cookingRecord.endTime
+        record.notes = notes.isEmpty ? nil : notes
+        record.photoPaths = savePhotoImages() as NSObject
+        
         return record
     }
     
-    /// 写真保存処理
-    private func savePhotos() -> [String] {
+    /// 写真を保存してパスを返す
+    private func savePhotoImages() -> [String] {
         var photoPaths: [String] = []
         
-        for (index, uiImage) in photoImages.enumerated() {
-            let imageName = "\(recipe.id?.uuidString ?? "unknown")_\(index)_\(Date().timeIntervalSince1970).jpg"
-            
-            if let imageData = uiImage.jpegData(compressionQuality: 0.8) {
-                let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-                let imageURL = documentsDirectory.appendingPathComponent(imageName)
+        for (index, image) in photoImages.enumerated() {
+            let fileName = "\(UUID().uuidString)_\(index).jpg"
+            if let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+                let fileURL = documentsDirectory.appendingPathComponent(fileName)
                 
-                do {
-                    try imageData.write(to: imageURL)
-                    photoPaths.append(imageName)
-                    AppLogger.success("画像保存成功: \(imageName)")
-                } catch {
-                    AppLogger.error("画像保存エラー", error: error)
+                if let imageData = image.jpegData(compressionQuality: 0.8) {
+                    try? imageData.write(to: fileURL)
+                    photoPaths.append(fileName)
                 }
-            } else {
-                AppLogger.error("画像データ変換エラー")
             }
         }
         
         return photoPaths
     }
+    
+    /// 経験値の初期表示を設定
+    // 旧メソッドは新しいsaveRecordメソッドに置き換えられました
     
 }
 

@@ -14,15 +14,15 @@ class ExperienceService {
     
     // MARK: - Experience Configuration
     private struct ExperienceConfig {
-        static let baseExperience = 15
+        static let baseExperience = 20
         static let difficultyMultiplier: [Int: Double] = [
-            1: 0.8,  // 簡単: 12 XP
-            2: 0.9,  // やや簡単: 13 XP
+            1: 0.90,  // 簡単: 12 XP
+            2: 0.95,  // やや簡単: 13 XP
             3: 1.0,  // 普通: 15 XP
-            4: 1.2,  // やや難しい: 18 XP
-            5: 1.5   // 難しい: 22 XP
+            4: 1.05,  // やや難しい: 18 XP
+            5: 1.1   // 難しい: 22 XP
         ]
-        static let completionBonusMultiplier = 1.1 // 写真・メモ完備時
+        static let completionBonusMultiplier = 1.5 // 写真・メモ完備時
     }
     
     // MARK: - Experience Calculation
@@ -40,6 +40,7 @@ class ExperienceService {
         let difficulty = Int(recipe?.difficulty ?? 3)
         let difficultyMultiplier = ExperienceConfig.difficultyMultiplier[difficulty] ?? 1.0
         
+        
         // 完了度による倍率
         let completionMultiplier = (hasPhotos || hasNotes) ? ExperienceConfig.completionBonusMultiplier : 1.0
         
@@ -50,6 +51,28 @@ class ExperienceService {
     /// 基本経験値を計算（レシピなしの場合）
     func calculateBasicExperience() -> Int {
         return ExperienceConfig.baseExperience
+    }
+    
+    /// 調理時間に基づく経験値を計算
+    /// - Parameter cookingTimeInMinutes: 調理時間（分）
+    /// - Returns: 獲得経験値
+    func calculateExperience(for cookingTimeInMinutes: Int) -> Int {
+        let baseXP = ExperienceConfig.baseExperience
+        
+        // 調理時間による倍率（15分基準）
+        let timeMultiplier: Double
+        if cookingTimeInMinutes <= 10 {
+            timeMultiplier = 0.8
+        } else if cookingTimeInMinutes <= 20 {
+            timeMultiplier = 1.0
+        } else if cookingTimeInMinutes <= 40 {
+            timeMultiplier = 1.2
+        } else {
+            timeMultiplier = 1.5
+        }
+        
+        let totalXP = Double(baseXP) * timeMultiplier
+        return Int(totalXP.rounded())
     }
     
     // MARK: - Experience Award
