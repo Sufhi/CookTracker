@@ -157,6 +157,7 @@ struct CookingSessionView: View {
                         cookingRecord: completionRecord,
                         user: currentUser
                     ) { record in
+                        // CookingSessionRecordを渡す（型の一致）
                         onCookingComplete(completionRecord)
                         dismiss()
                     }
