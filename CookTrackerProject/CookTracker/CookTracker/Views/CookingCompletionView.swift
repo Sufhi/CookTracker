@@ -238,6 +238,14 @@ struct CookingCompletionView: View {
         
         print("💾 CookingCompletionView: 経験値処理完了 - 獲得: \(experienceGained), レベルアップ: \(didLevelUp)")
         
+        // 経験値獲得通知をトリガー
+        ExperienceNotificationManager.shared.triggerExperienceNotification(
+            gained: experienceGained,
+            levelUp: didLevelUp,
+            oldLv: oldLevel,
+            newLv: newLevel
+        )
+        
         // 調理記録を保存して直接完了
         onComplete(createFinalCookingRecord())
         dismiss()
