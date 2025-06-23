@@ -128,11 +128,66 @@ struct RecipeFormView: View {
             newRecipe.url = url.isEmpty ? nil : url
             newRecipe.createdAt = Date()
             newRecipe.updatedAt = Date()
+            
+            // Core Dataに先に保存
+            PersistenceController.shared.save()
+            
+            // 新規レシピ登録時の経験値処理
+            let experienceGained = processNewRecipeExperience(recipe: newRecipe)
+            
+            // 経験値通知をトリガー（レベルアップ判定は行わない）
+            if experienceGained > 0 {
+                ExperienceNotificationManager.shared.triggerExperienceNotification(
+                    gained: experienceGained,
+                    levelUp: false,
+                    oldLv: 0,
+                    newLv: 0
+                )
+            }
         }
         
-        PersistenceController.shared.save()
+        if isEditMode {
+            PersistenceController.shared.save()
+        }
+        
         onSave?()
         dismiss()
+    }
+    
+    /// 新規レシピ登録時の経験値処理
+    /// - Parameter recipe: 新規作成されたレシピ
+    /// - Returns: 獲得した経験値
+    private func processNewRecipeExperience(recipe: Recipe) -> Int {
+        var totalExperience = 0
+        
+        // レシピ登録ボーナス（1日1回制限）
+        let registrationBonus = ExperienceService.shared.processRecipeRegistrationBonus(context: viewContext)
+        totalExperience += registrationBonus
+        
+        // 難易度・カテゴリボーナス
+        let enhancedExperience = ExperienceService.shared.calculateEnhancedExperience(
+            context: viewContext,
+            recipe: recipe,
+            hasPhotos: false,
+            hasNotes: !instructions.isEmpty,
+            isNewRecipe: true
+        )
+        
+        // 基本経験値は除いて、ボーナス分のみを追加
+        let baseExperience = ExperienceService.shared.calculateExperience(
+            for: recipe,
+            hasPhotos: false,
+            hasNotes: !instructions.isEmpty
+        )
+        let bonusOnly = enhancedExperience - baseExperience
+        totalExperience += bonusOnly
+        
+        // ユーザーに経験値付与
+        let user = PersistenceController.shared.getOrCreateDefaultUser()
+        ExperienceService.shared.awardExperience(to: user, amount: totalExperience)
+        PersistenceController.shared.save()
+        
+        return totalExperience
     }
 }
 

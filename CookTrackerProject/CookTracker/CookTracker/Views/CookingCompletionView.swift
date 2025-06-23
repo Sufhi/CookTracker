@@ -217,15 +217,32 @@ struct CookingCompletionView: View {
             return
         }
         
-        // 経験値計算
+        // 経験値計算（拡張ボーナス含む）
         let oldLevel = Int(user.level)
-        let experienceGained = ExperienceService.shared.calculateExperience(
-            for: nil,
+        
+        // 時間精度ボーナス計算
+        let timePrecisionBonus = ExperienceService.shared.calculateTimePrecisionBonus(
+            estimatedTimeInMinutes: Int(recipe.estimatedTimeInMinutes),
+            actualTimeInMinutes: cookingRecord.actualMinutes
+        )
+        
+        // 連続調理ボーナス計算
+        let consecutiveBonus = ExperienceService.shared.calculateConsecutiveCookingBonus(context: viewContext)
+        
+        // 基本経験値計算
+        let baseExperience = ExperienceService.shared.calculateExperience(
+            for: recipe,
             hasPhotos: !photoImages.isEmpty,
             hasNotes: !notes.isEmpty
         )
         
-        print("💾 CookingCompletionView: 経験値計算 - 獲得: \(experienceGained), 旧レベル: \(oldLevel)")
+        // 追加の難易度ボーナス（星4-5のみ）
+        let difficultyBonus = ExperienceService.shared.calculateDifficultyBonus(difficulty: Int(recipe.difficulty))
+        
+        // 合計経験値
+        let experienceGained = baseExperience + timePrecisionBonus + consecutiveBonus + difficultyBonus
+        
+        print("💾 CookingCompletionView: 経験値詳細 - 基本: \(baseExperience), 時間精度: \(timePrecisionBonus), 連続: \(consecutiveBonus), 難易度: \(difficultyBonus), 合計: \(experienceGained)")
         
         // 経験値付与とレベルアップ判定
         let didLevelUp = user.addExperience(Int32(experienceGained))
@@ -258,11 +275,20 @@ struct CookingCompletionView: View {
         record.recipe = recipe
         record.recipeId = recipe.id
         record.cookingTimeInMinutes = Int32(cookingRecord.actualMinutes)
-        record.experienceGained = Int32(ExperienceService.shared.calculateExperience(
-            for: nil,
+        // 拡張経験値計算（調理完了時と同じ計算）
+        let baseExp = ExperienceService.shared.calculateExperience(
+            for: recipe,
             hasPhotos: !photoImages.isEmpty,
             hasNotes: !notes.isEmpty
-        ))
+        )
+        let timePrecisionExp = ExperienceService.shared.calculateTimePrecisionBonus(
+            estimatedTimeInMinutes: Int(recipe.estimatedTimeInMinutes),
+            actualTimeInMinutes: cookingRecord.actualMinutes
+        )
+        let consecutiveExp = ExperienceService.shared.calculateConsecutiveCookingBonus(context: viewContext)
+        let difficultyExp = ExperienceService.shared.calculateDifficultyBonus(difficulty: Int(recipe.difficulty))
+        
+        record.experienceGained = Int32(baseExp + timePrecisionExp + consecutiveExp + difficultyExp)
         record.cookedAt = cookingRecord.endTime
         record.notes = notes.isEmpty ? nil : notes
         record.photoPaths = savePhotoImages() as NSObject
