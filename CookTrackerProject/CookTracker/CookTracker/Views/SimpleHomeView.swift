@@ -13,6 +13,7 @@ struct SimpleHomeView: View {
     @State private var isShowingTimer = false
     @State private var isShowingCookingSession = false
     @State private var isShowingSettings = false
+    @State private var selectedCookingRecord: CookingRecord?
     @EnvironmentObject private var sessionManager: CookingSessionManager
     @StateObject private var experienceNotificationManager = ExperienceNotificationManager.shared
     
@@ -73,10 +74,13 @@ struct SimpleHomeView: View {
                 .shadow(color: .black.opacity(0.1), radius: 3, x: 0, y: 2)
                 .padding(.bottom, (sessionManager.isCurrentlyCooking || sessionManager.sharedHelperTimer.isRunning || (sessionManager.sharedHelperTimer.timeRemaining > 0 && !sessionManager.sharedHelperTimer.isFinished)) ? 4 : 0)
                 
+                // 継続メッセージ（一番上に固定表示）
+                continuityMessageSection(records: recentCookingRecords)
+                
                 // スクロール可能なメインコンテンツ
                 ScrollView {
                     VStack(spacing: 20) {
-                        // 調理統計セクション
+                        // 調理統計セクション（メッセージなし）
                         cookingStatsSection(records: recentCookingRecords)
                         
                         // ユーザー情報・レベル表示セクション
@@ -97,7 +101,83 @@ struct SimpleHomeView: View {
                         )
                         
                         // 最近の料理履歴セクション
-                        recentHistorySection(records: recentCookingRecords)
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack {
+                                Image(systemName: "clock.fill")
+                                    .foregroundColor(.brown)
+                                Text("最近の料理履歴")
+                                    .font(.headline)
+                                    .fontWeight(.semibold)
+                                
+                                Spacer()
+                            }
+                            
+                            // Core Dataからの履歴データ
+                            VStack(spacing: 8) {
+                                let cookingRecords = Array(recentCookingRecords)
+                                if cookingRecords.isEmpty {
+                                    Text("まだ調理記録がありません")
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                        .padding()
+                                } else {
+                                    ForEach(Array(cookingRecords.prefix(3)), id: \.id) { record in
+                                        Button {
+                                            selectedCookingRecord = record
+                                        } label: {
+                                            HStack(spacing: 12) {
+                                                Circle()
+                                                    .fill(Color.brown.opacity(0.2))
+                                                    .frame(width: 40, height: 40)
+                                                    .overlay(
+                                                        Image(systemName: "fork.knife")
+                                                            .foregroundColor(.brown)
+                                                            .font(.system(size: 16))
+                                                    )
+                                                
+                                                VStack(alignment: .leading, spacing: 2) {
+                                                    Text(record.recipe?.title ?? "不明なレシピ")
+                                                        .font(.subheadline)
+                                                        .fontWeight(.medium)
+                                                        .foregroundColor(.primary)
+                                                    
+                                                    Text(formatDate(record.cookedAt ?? Date()))
+                                                        .font(.caption)
+                                                        .foregroundColor(.secondary)
+                                                }
+                                                
+                                                Spacer()
+                                                
+                                                VStack(alignment: .trailing, spacing: 2) {
+                                                    Text("+\(Int(record.experienceGained)) XP")
+                                                        .font(.caption)
+                                                        .fontWeight(.semibold)
+                                                        .foregroundColor(.brown)
+                                                    
+                                                    Text("\(Int(record.cookingTimeInMinutes))分")
+                                                        .font(.caption)
+                                                        .foregroundColor(.secondary)
+                                                }
+                                                
+                                                // タップ可能を示すアイコン
+                                                Image(systemName: "chevron.right")
+                                                    .font(.caption)
+                                                    .foregroundColor(.secondary)
+                                            }
+                                            .padding(.vertical, 8)
+                                            .padding(.horizontal, 4)
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                }
+                            }
+                        }
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color(.systemBackground))
+                                .shadow(color: .gray.opacity(0.2), radius: 4, x: 0, y: 2)
+                        )
                     }
                     .padding()
                 }
@@ -142,91 +222,12 @@ struct SimpleHomeView: View {
                     )
                 }
             }
+            .sheet(item: $selectedCookingRecord) { record in
+                CookingRecordDetailView(cookingRecord: record)
+            }
         }
     }
     
-    // MARK: - View Components
-    
-    @ViewBuilder
-    private func recentHistorySection(records: FetchedResults<CookingRecord>) -> some View {
-        // Core Dataからの履歴データを取得
-        let cookingRecords = Array(records)
-        
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Image(systemName: "clock.fill")
-                    .foregroundColor(.brown)
-                Text("最近の料理履歴")
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                
-                Spacer()
-            }
-            
-            // Core Dataからの履歴データ
-            VStack(spacing: 8) {
-                if cookingRecords.isEmpty {
-                    Text("まだ調理記録がありません")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .padding()
-                } else {
-                    ForEach(Array(cookingRecords.prefix(3)), id: \.id) { record in
-                        recentRecordRow(
-                            title: record.recipe?.title ?? "不明なレシピ",
-                            date: formatDate(record.cookedAt ?? Date()),
-                            exp: Int(record.experienceGained),
-                            time: Int(record.cookingTimeInMinutes)
-                        )
-                    }
-                }
-            }
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemBackground))
-                .shadow(color: .gray.opacity(0.2), radius: 4, x: 0, y: 2)
-        )
-    }
-    
-    @ViewBuilder
-    private func recentRecordRow(title: String, date: String, exp: Int, time: Int) -> some View {
-        HStack(spacing: 12) {
-            Circle()
-                .fill(Color.brown.opacity(0.2))
-                .frame(width: 40, height: 40)
-                .overlay(
-                    Image(systemName: "fork.knife")
-                        .foregroundColor(.brown)
-                        .font(.system(size: 16))
-                )
-            
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                
-                Text(date)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-            
-            Spacer()
-            
-            VStack(alignment: .trailing, spacing: 2) {
-                Text("+\(exp) XP")
-                    .font(.caption)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.brown)
-                
-                Text("\(time)分")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-        }
-        .padding(.vertical, 4)
-    }
     
     // MARK: - Methods
     
@@ -235,6 +236,39 @@ struct SimpleHomeView: View {
         let formatter = DateFormatter()
         formatter.dateFormat = "MM/dd"
         return formatter.string(from: date)
+    }
+    
+    // MARK: - Continuity Message Section
+    @ViewBuilder
+    private func continuityMessageSection(records: FetchedResults<CookingRecord>) -> some View {
+        // Core Dataからの履歴データを取得
+        let cookingRecords = Array(records)
+        let statsData = CookingStatsData(records: cookingRecords)
+        
+        // 継続メッセージがある場合のみ表示
+        if statsData.totalDays > 0 {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(statsData.continuityMessage)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundColor(.primary)
+                
+                if statsData.currentStreak > 0 {
+                    Text("現在\(statsData.currentStreak)日連続で調理中です！")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color.brown.opacity(0.1))
+            )
+            .padding(.horizontal)
+            .padding(.bottom, 8)
+        }
     }
     
     // MARK: - Cooking Stats Section
@@ -251,34 +285,12 @@ struct SimpleHomeView: View {
                     .foregroundColor(.brown)
                     .font(.title3)
                 
-                Text("調理の継続状況")
+                Text("あなたの料理記録")
                     .font(.headline)
                     .fontWeight(.semibold)
                     .foregroundColor(.brown)
                 
                 Spacer()
-            }
-            
-            // 継続メッセージ
-            if statsData.totalDays > 0 {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(statsData.continuityMessage)
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .foregroundColor(.primary)
-                    
-                    if statsData.currentStreak > 0 {
-                        Text("現在\(statsData.currentStreak)日連続で調理中です！")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 10)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color.brown.opacity(0.1))
-                )
             }
             
             // 統計グリッド
