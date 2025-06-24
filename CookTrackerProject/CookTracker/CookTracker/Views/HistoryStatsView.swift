@@ -13,6 +13,7 @@ struct HistoryStatsView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @State private var selectedTab = 0
     @State private var isShowingSettings = false
+    @State private var selectedCookingRecord: CookingRecord?
     
     // Core Data取得
     @FetchRequest(
@@ -53,6 +54,9 @@ struct HistoryStatsView: View {
             }
             .sheet(isPresented: $isShowingSettings) {
                 SettingsView()
+            }
+            .sheet(item: $selectedCookingRecord) { record in
+                CookingRecordDetailView(cookingRecord: record)
             }
         }
     }
@@ -100,7 +104,10 @@ struct HistoryStatsView: View {
                     ForEach(groupedRecords.keys.sorted(by: >), id: \.self) { date in
                         HistoryDaySection(
                             date: date,
-                            records: groupedRecords[date] ?? []
+                            records: groupedRecords[date] ?? [],
+                            onRecordTap: { record in
+                                selectedCookingRecord = record
+                            }
                         )
                     }
                 }

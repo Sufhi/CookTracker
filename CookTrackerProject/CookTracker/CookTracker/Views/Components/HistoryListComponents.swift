@@ -11,6 +11,7 @@ import CoreData
 struct HistoryDaySection: View {
     let date: Date
     let records: [CookingRecord]
+    let onRecordTap: (CookingRecord) -> Void
     
     private var dateFormatter: DateFormatter {
         let formatter = DateFormatter()
@@ -37,7 +38,7 @@ struct HistoryDaySection: View {
             // レコード一覧
             VStack(spacing: 8) {
                 ForEach(records, id: \.id) { record in
-                    HistoryRecordRow(record: record)
+                    HistoryRecordRow(record: record, onTap: onRecordTap)
                 }
             }
         }
@@ -53,6 +54,7 @@ struct HistoryDaySection: View {
 // MARK: - History Record Row
 struct HistoryRecordRow: View {
     let record: CookingRecord
+    let onTap: (CookingRecord) -> Void
     
     private var timeFormatter: DateFormatter {
         let formatter = DateFormatter()
@@ -61,62 +63,73 @@ struct HistoryRecordRow: View {
     }
     
     var body: some View {
-        HStack(spacing: 12) {
-            // レシピアイコン
-            Circle()
-                .fill(Color.brown.opacity(0.1))
-                .frame(width: 50, height: 50)
-                .overlay(
-                    Image(systemName: "fork.knife")
-                        .font(.system(size: 20))
-                        .foregroundColor(.brown)
-                )
-            
-            // レシピ情報
-            VStack(alignment: .leading, spacing: 4) {
-                Text(record.recipe?.title ?? "不明なレシピ")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .lineLimit(1)
+        Button {
+            onTap(record)
+        } label: {
+            HStack(spacing: 12) {
+                // レシピアイコン
+                Circle()
+                    .fill(Color.brown.opacity(0.1))
+                    .frame(width: 50, height: 50)
+                    .overlay(
+                        Image(systemName: "fork.knife")
+                            .font(.system(size: 20))
+                            .foregroundColor(.brown)
+                    )
                 
-                HStack {
-                    if let cookedAt = record.cookedAt {
-                        Text(timeFormatter.string(from: cookedAt))
+                // レシピ情報
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(record.recipe?.title ?? "不明なレシピ")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .lineLimit(1)
+                        .foregroundColor(.primary)
+                    
+                    HStack {
+                        if let cookedAt = record.cookedAt {
+                            Text(timeFormatter.string(from: cookedAt))
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        
+                        Text("•")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        
+                        Text(record.formattedCookingTime)
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
-                    
-                    Text("•")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    
-                    Text(record.formattedCookingTime)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
                 }
-            }
-            
-            Spacer()
-            
-            // 経験値・写真情報
-            VStack(alignment: .trailing, spacing: 4) {
-                Text("+\(record.experienceGained) XP")
-                    .font(.caption)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.brown)
                 
-                if let photoPaths = record.photoPaths as? [String], !photoPaths.isEmpty {
-                    HStack(spacing: 2) {
-                        Image(systemName: "camera.fill")
-                            .font(.caption2)
-                        Text("\(photoPaths.count)")
-                            .font(.caption2)
+                Spacer()
+                
+                // 経験値・写真情報
+                VStack(alignment: .trailing, spacing: 4) {
+                    Text("+\(record.experienceGained) XP")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.brown)
+                    
+                    if let photoPaths = record.photoPaths as? [String], !photoPaths.isEmpty {
+                        HStack(spacing: 2) {
+                            Image(systemName: "camera.fill")
+                                .font(.caption2)
+                            Text("\(photoPaths.count)")
+                                .font(.caption2)
+                        }
+                        .foregroundColor(.blue)
                     }
-                    .foregroundColor(.blue)
                 }
+                
+                // タップ可能を示すアイコン
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
+            .padding(.vertical, 4)
         }
-        .padding(.vertical, 4)
+        .buttonStyle(.plain)
     }
 }
 
@@ -126,7 +139,7 @@ struct HistoryListComponents_Previews: PreviewProvider {
         let context = PersistenceController.preview.container.viewContext
         
         return VStack {
-            HistoryDaySection(date: Date(), records: [])
+            HistoryDaySection(date: Date(), records: []) { _ in }
             
             Text("Preview Content")
                 .padding()

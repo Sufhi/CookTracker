@@ -164,6 +164,18 @@ struct CoreDataRecipeDetailView: View {
                         }
                     }
                     
+                    // 調理履歴セクション
+                    if !cookingRecords.isEmpty {
+                        Divider()
+                        cookingHistorySection
+                    }
+                    
+                    // 改善メモセクション
+                    if !improvementNotes.isEmpty {
+                        Divider()
+                        improvementNotesSection
+                    }
+                    
                     Spacer()
                 }
                 .padding()
@@ -230,6 +242,163 @@ struct CoreDataRecipeDetailView: View {
                 )
             }
         }
+    }
+    
+    // MARK: - View Components
+    
+    @ViewBuilder
+    private var cookingHistorySection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Image(systemName: "clock.fill")
+                    .foregroundColor(.brown)
+                Text("調理履歴")
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                
+                Spacer()
+                
+                Text("\(cookingRecords.count)回")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                
+                if cookingRecords.count > 3 {
+                    Button("すべて表示") {
+                        isShowingFullHistory = true
+                    }
+                    .font(.caption)
+                    .foregroundColor(.brown)
+                }
+            }
+            
+            VStack(spacing: 8) {
+                ForEach(Array(cookingRecords.prefix(3)), id: \.id) { record in
+                    Button {
+                        selectedCookingRecord = record
+                    } label: {
+                        HStack(spacing: 12) {
+                            // 日付アイコン
+                            Circle()
+                                .fill(Color.brown.opacity(0.1))
+                                .frame(width: 40, height: 40)
+                                .overlay(
+                                    Text(dayOfMonth(from: record.cookedAt ?? Date()))
+                                        .font(.caption)
+                                        .fontWeight(.semibold)
+                                        .foregroundColor(.brown)
+                                )
+                            
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(record.formattedDetailedDate)
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                                    .foregroundColor(.primary)
+                                
+                                HStack {
+                                    Text("調理時間: \(record.formattedCookingTime)")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                    
+                                    Text("•")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                    
+                                    Text("+\(record.experienceGained) XP")
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                        .foregroundColor(.brown)
+                                }
+                            }
+                            
+                            Spacer()
+                            
+                            // アクション情報
+                            VStack(alignment: .trailing, spacing: 2) {
+                                if record.hasPhotos {
+                                    HStack(spacing: 2) {
+                                        Image(systemName: "camera.fill")
+                                            .font(.caption2)
+                                        Text("\(record.photoCount)")
+                                            .font(.caption2)
+                                    }
+                                    .foregroundColor(.blue)
+                                }
+                                
+                                if record.hasNotes {
+                                    Image(systemName: "note.text")
+                                        .font(.caption2)
+                                        .foregroundColor(.green)
+                                }
+                            }
+                            
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        .padding(.vertical, 8)
+                        .padding(.horizontal, 4)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private var improvementNotesSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Image(systemName: "note.text.badge.plus")
+                    .foregroundColor(.brown)
+                Text("改善メモ（直近5回）")
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                
+                Spacer()
+            }
+            
+            VStack(spacing: 12) {
+                ForEach(Array(improvementNotes.prefix(5)), id: \.id) { record in
+                    Button {
+                        selectedCookingRecord = record
+                    } label: {
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Text(record.formattedShortDate)
+                                    .font(.caption)
+                                    .fontWeight(.medium)
+                                    .foregroundColor(.brown)
+                                
+                                Spacer()
+                                
+                                Image(systemName: "chevron.right")
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                            }
+                            
+                            Text(record.notes ?? "")
+                                .font(.subheadline)
+                                .foregroundColor(.primary)
+                                .multilineTextAlignment(.leading)
+                                .lineLimit(3)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                        .padding(12)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color(.systemGroupedBackground))
+                        )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+    
+    private func dayOfMonth(from date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "d"
+        return formatter.string(from: date)
     }
     
     private func saveThumbnail(_ image: UIImage?) {
