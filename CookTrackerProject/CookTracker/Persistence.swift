@@ -63,6 +63,7 @@ struct PersistenceController {
     // MARK: - Initializer
     init(inMemory: Bool = false) {
         container = NSPersistentContainer(name: "CookTracker")
+        print("🔍 Core Data初期化開始 - Container名: CookTracker")
         
         if inMemory {
             container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
@@ -77,10 +78,12 @@ struct PersistenceController {
         
         container.loadPersistentStores { [container] _, error in
             if let error = error as NSError? {
+                print("❌ Core Data読み込みエラー: \(error)")
                 AppLogger.coreDataError("Core Data読み込み", error: error)
                 // フォールバック処理: インメモリストアに切り替え
                 Self.handleCoreDataLoadErrorStatic(container: container, error: error)
             } else {
+                print("✅ Core Data初期化成功")
                 AppLogger.coreDataSuccess("Core Data初期化")
             }
         }
@@ -111,9 +114,23 @@ struct PersistenceController {
         
         do {
             let users = try context.fetch(request)
+            print("🔍 ユーザー取得試行 - 見つかったユーザー数: \(users.count)")
+            
             if let existingUser = users.first {
+                print("✅ 既存ユーザー発見 - レベル: \(existingUser.level), 経験値: \(existingUser.experiencePoints)")
                 return existingUser
             } else {
+                print("⚠️ ユーザーが見つからないため新規作成します")
+                
+                // レシピとCookingRecordの状況も確認
+                let recipeRequest: NSFetchRequest<Recipe> = Recipe.fetchRequest()
+                let cookingRecordRequest: NSFetchRequest<CookingRecord> = CookingRecord.fetchRequest()
+                
+                let recipeCount = (try? context.fetch(recipeRequest).count) ?? 0
+                let cookingRecordCount = (try? context.fetch(cookingRecordRequest).count) ?? 0
+                
+                print("📊 既存データ状況 - レシピ: \(recipeCount)件, 調理記録: \(cookingRecordCount)件")
+                
                 // デフォルトユーザーを新規作成
                 let newUser = User(context: context)
                 newUser.id = UUID()
@@ -124,16 +141,23 @@ struct PersistenceController {
                 newUser.createdAt = Date()
                 newUser.updatedAt = Date()
                 
-                // 初回起動時はサンプルレシピも作成
-                createSampleRecipes(in: context)
+                // サンプルレシピがない場合のみ作成
+                if recipeCount == 0 {
+                    print("📝 サンプルレシピを作成します")
+                    createSampleRecipes(in: context)
+                } else {
+                    print("📝 既存レシピがあるためサンプル作成をスキップ")
+                }
                 
                 save()
                 AppLogger.coreDataSuccess("デフォルトユーザー作成")
                 return newUser
             }
         } catch {
+            print("❌ ユーザー取得エラー: \(error)")
             AppLogger.coreDataError("ユーザー取得", error: error)
-            // エラーの場合も新規ユーザーを作成
+            
+            // エラーの場合も新規ユーザーを作成（ただし既存データは保持）
             let newUser = User(context: context)
             newUser.id = UUID()
             newUser.username = "料理初心者"
@@ -142,6 +166,18 @@ struct PersistenceController {
             newUser.isRegistered = false
             newUser.createdAt = Date()
             newUser.updatedAt = Date()
+            
+            // エラー時でもサンプルレシピの重複作成を防ぐ
+            let recipeRequest: NSFetchRequest<Recipe> = Recipe.fetchRequest()
+            let recipeCount = (try? context.fetch(recipeRequest).count) ?? 0
+            
+            if recipeCount == 0 {
+                print("📝 エラー時サンプルレシピ作成")
+                createSampleRecipes(in: context)
+            } else {
+                print("📝 エラー時も既存レシピ保持")
+            }
+            
             save()
             return newUser
         }

@@ -1,0 +1,55 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# fastlane/Fastfile
+
+default_platform(:ios)
+
+platform :ios do
+  desc "Run all tests"
+  lane :test do
+    # 単体テスト実行
+    run_tests(
+      scheme: "CookTracker", # あなたのテストスキーム名に変更
+      device: "iPhone 15", # 使用するシミュレーター
+      clean: true
+    )
+  end
+  
+  desc "Run tests and generate coverage report"
+  lane :test_with_coverage do
+    run_tests(
+      scheme: "CookTracker",
+      device: "iPhone 15",
+      clean: true,
+      code_coverage: true
+    )
+  end
+  
+  desc "Run UI tests only"
+  lane :ui_test do
+    run_tests(
+      scheme: "CookTracker",
+      device: "iPhone 15",
+      only_testing: ["CookTrackerUITests"] # UIテストターゲット名
+    )
+  end
+  
+  desc "Run unit tests only"
+  lane :unit_test do
+    run_tests(
+      scheme: "CookTracker",
+      device: "iPhone 15",
+      skip_testing: ["CookTrackerUITests"] # UIテストを除外
+    )
+  end
+end

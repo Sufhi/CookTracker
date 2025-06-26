@@ -11,7 +11,26 @@
 		70E89F822DFE91E700657FFA /* CookTracker.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 70E89F802DFE91E700657FFA /* CookTracker.xcdatamodeld */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		708ABB8E2E068955006EE486 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 70E89F332DFE8C5500657FFA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 70E89F3A2DFE8C5500657FFA;
+			remoteInfo = CookTracker;
+		};
+		708ABB9B2E068989006EE486 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 70E89F332DFE8C5500657FFA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 70E89F3A2DFE8C5500657FFA;
+			remoteInfo = CookTracker;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		708ABB882E068955006EE486 /* CookTrackerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CookTrackerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		708ABB972E068989006EE486 /* CookTrackerUNITTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CookTrackerUNITTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		70E89F3B2DFE8C5500657FFA /* CookTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CookTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		70E89F722DFE8EEB00657FFA /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
 		70E89F812DFE91E700657FFA /* CookTracker.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CookTracker.xcdatamodel; sourceTree = "<group>"; };
@@ -19,6 +38,16 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		708ABB892E068955006EE486 /* CookTrackerUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = CookTrackerUITests;
+			sourceTree = "<group>";
+		};
+		708ABB982E068989006EE486 /* CookTrackerUNITTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = CookTrackerUNITTests;
+			sourceTree = "<group>";
+		};
 		70E89F3D2DFE8C5500657FFA /* CookTracker */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = CookTracker;
@@ -27,6 +56,20 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		708ABB852E068955006EE486 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		708ABB942E068989006EE486 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		70E89F382DFE8C5500657FFA /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -42,6 +85,8 @@
 			children = (
 				70E89F802DFE91E700657FFA /* CookTracker.xcdatamodeld */,
 				70E89F3D2DFE8C5500657FFA /* CookTracker */,
+				708ABB892E068955006EE486 /* CookTrackerUITests */,
+				708ABB982E068989006EE486 /* CookTrackerUNITTests */,
 				70E89F3C2DFE8C5500657FFA /* Products */,
 				70E89F722DFE8EEB00657FFA /* Persistence.swift */,
 			);
@@ -51,6 +96,8 @@
 			isa = PBXGroup;
 			children = (
 				70E89F3B2DFE8C5500657FFA /* CookTracker.app */,
+				708ABB882E068955006EE486 /* CookTrackerUITests.xctest */,
+				708ABB972E068989006EE486 /* CookTrackerUNITTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -58,6 +105,52 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		708ABB872E068955006EE486 /* CookTrackerUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 708ABB902E068955006EE486 /* Build configuration list for PBXNativeTarget "CookTrackerUITests" */;
+			buildPhases = (
+				708ABB842E068955006EE486 /* Sources */,
+				708ABB852E068955006EE486 /* Frameworks */,
+				708ABB862E068955006EE486 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				708ABB8F2E068955006EE486 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				708ABB892E068955006EE486 /* CookTrackerUITests */,
+			);
+			name = CookTrackerUITests;
+			packageProductDependencies = (
+			);
+			productName = CookTrackerUITests;
+			productReference = 708ABB882E068955006EE486 /* CookTrackerUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		708ABB962E068989006EE486 /* CookTrackerUNITTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 708ABB9D2E068989006EE486 /* Build configuration list for PBXNativeTarget "CookTrackerUNITTests" */;
+			buildPhases = (
+				708ABB932E068989006EE486 /* Sources */,
+				708ABB942E068989006EE486 /* Frameworks */,
+				708ABB952E068989006EE486 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				708ABB9C2E068989006EE486 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				708ABB982E068989006EE486 /* CookTrackerUNITTests */,
+			);
+			name = CookTrackerUNITTests;
+			packageProductDependencies = (
+			);
+			productName = CookTrackerUNITTests;
+			productReference = 708ABB972E068989006EE486 /* CookTrackerUNITTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		70E89F3A2DFE8C5500657FFA /* CookTracker */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 70E89F4B2DFE8C5600657FFA /* Build configuration list for PBXNativeTarget "CookTracker" */;
@@ -90,6 +183,14 @@
 				LastSwiftUpdateCheck = 1640;
 				LastUpgradeCheck = 1640;
 				TargetAttributes = {
+					708ABB872E068955006EE486 = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = 70E89F3A2DFE8C5500657FFA;
+					};
+					708ABB962E068989006EE486 = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = 70E89F3A2DFE8C5500657FFA;
+					};
 					70E89F3A2DFE8C5500657FFA = {
 						CreatedOnToolsVersion = 16.4;
 					};
@@ -110,11 +211,27 @@
 			projectRoot = "";
 			targets = (
 				70E89F3A2DFE8C5500657FFA /* CookTracker */,
+				708ABB872E068955006EE486 /* CookTrackerUITests */,
+				708ABB962E068989006EE486 /* CookTrackerUNITTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		708ABB862E068955006EE486 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		708ABB952E068989006EE486 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		70E89F392DFE8C5500657FFA /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -125,6 +242,20 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		708ABB842E068955006EE486 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		708ABB932E068989006EE486 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		70E89F372DFE8C5500657FFA /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -136,7 +267,102 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		708ABB8F2E068955006EE486 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 70E89F3A2DFE8C5500657FFA /* CookTracker */;
+			targetProxy = 708ABB8E2E068955006EE486 /* PBXContainerItemProxy */;
+		};
+		708ABB9C2E068989006EE486 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 70E89F3A2DFE8C5500657FFA /* CookTracker */;
+			targetProxy = 708ABB9B2E068989006EE486 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		708ABB912E068955006EE486 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = bas.CookTrackerUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = CookTracker;
+			};
+			name = Debug;
+		};
+		708ABB922E068955006EE486 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = bas.CookTrackerUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = CookTracker;
+			};
+			name = Release;
+		};
+		708ABB9E2E068989006EE486 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = bas.CookTrackerUNITTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CookTracker.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/CookTracker";
+			};
+			name = Debug;
+		};
+		708ABB9F2E068989006EE486 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = bas.CookTrackerUNITTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CookTracker.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/CookTracker";
+			};
+			name = Release;
+		};
 		70E89F492DFE8C5600657FFA /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -265,10 +491,11 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.food-and-drink";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -283,7 +510,7 @@
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -296,10 +523,11 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.food-and-drink";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -314,13 +542,31 @@
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		708ABB902E068955006EE486 /* Build configuration list for PBXNativeTarget "CookTrackerUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				708ABB912E068955006EE486 /* Debug */,
+				708ABB922E068955006EE486 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		708ABB9D2E068989006EE486 /* Build configuration list for PBXNativeTarget "CookTrackerUNITTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				708ABB9E2E068989006EE486 /* Debug */,
+				708ABB9F2E068989006EE486 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		70E89F362DFE8C5500657FFA /* Build configuration list for PBXProject "CookTracker" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

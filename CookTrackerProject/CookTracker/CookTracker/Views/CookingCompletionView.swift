@@ -20,14 +20,8 @@ struct CookingCompletionView: View {
     @Environment(\.managedObjectContext) private var viewContext
     
     // UI State
-    @State private var selectedPhotos: [PhotosPickerItem] = []
     @State private var photoImages: [UIImage] = []
     @State private var notes = ""
-    @State private var isShowingCamera = false
-    @State private var isShowingLevelUpAnimation = false
-    @State private var leveledUp = false
-    @State private var newLevel: Int = 1
-    @State private var experienceGained: Int = 15
     
     // MARK: - Body
     var body: some View {
@@ -41,13 +35,13 @@ struct CookingCompletionView: View {
                     cookingTimeSection
                     
                     // 写真セクション
-                    photoSection
+                    PhotoManagementView(photoImages: $photoImages)
                     
                     // メモセクション
                     notesSection
                     
-                    // 経験値・レベル表示
-                    experienceSection
+                    // 保存ボタン
+                    saveButtonSection
                     
                     Spacer(minLength: 100)
                 }
@@ -58,34 +52,15 @@ struct CookingCompletionView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("後で") {
-                        saveBasicRecord()
+                        dismiss()
                     }
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("保存") {
-                        saveCompletionRecord()
+                        saveRecord()
                     }
                     .fontWeight(.semibold)
-                    .disabled(photoImages.isEmpty && notes.isEmpty)
-                }
-            }
-            .sheet(isPresented: $isShowingCamera) {
-                CameraView { image in
-                    photoImages.append(image)
-                }
-            }
-            .onChange(of: selectedPhotos) {
-                loadSelectedPhotos()
-            }
-            .overlay {
-                if isShowingLevelUpAnimation {
-                    LevelUpAnimationView(
-                        newLevel: newLevel,
-                        onComplete: {
-                            isShowingLevelUpAnimation = false
-                        }
-                    )
                 }
             }
         }
@@ -163,84 +138,6 @@ struct CookingCompletionView: View {
     }
     
     @ViewBuilder
-    private var photoSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("完成写真")
-                .font(.headline)
-                .fontWeight(.semibold)
-            
-            // 写真表示グリッド
-            if !photoImages.isEmpty {
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 12) {
-                    ForEach(Array(photoImages.enumerated()), id: \.offset) { index, image in
-                        ZStack(alignment: .topTrailing) {
-                            Image(uiImage: image)
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .frame(width: 100, height: 100)
-                                .clipped()
-                                .cornerRadius(8)
-                            
-                            Button(action: {
-                                photoImages.remove(at: index)
-                            }) {
-                                Image(systemName: "xmark.circle.fill")
-                                    .font(.title3)
-                                    .foregroundColor(.white)
-                                    .background(Circle().fill(Color.black.opacity(0.6)))
-                            }
-                            .offset(x: 5, y: -5)
-                        }
-                    }
-                }
-            }
-            
-            // 写真追加ボタン
-            HStack(spacing: 12) {
-                PhotosPicker(
-                    selection: $selectedPhotos,
-                    maxSelectionCount: 20 - photoImages.count,
-                    matching: .images
-                ) {
-                    Label("写真を選択", systemImage: "photo.on.rectangle")
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(Color.blue.opacity(0.1))
-                        )
-                        .foregroundColor(.blue)
-                }
-                .buttonStyle(.plain)
-                
-                Button(action: {
-                    isShowingCamera = true
-                }) {
-                    Label("カメラで撮影", systemImage: "camera")
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(Color.green.opacity(0.1))
-                        )
-                        .foregroundColor(.green)
-                }
-                .buttonStyle(.plain)
-            }
-            
-            Text("最大20枚まで保存できます（現在: \(photoImages.count)/20）")
-                .font(.caption)
-                .foregroundColor(.secondary)
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemBackground))
-                .shadow(color: .gray.opacity(0.2), radius: 4, x: 0, y: 2)
-        )
-    }
-    
-    @ViewBuilder
     private var notesSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("改善メモ")
@@ -272,280 +169,155 @@ struct CookingCompletionView: View {
     }
     
     @ViewBuilder
-    private var experienceSection: some View {
+    private var saveButtonSection: some View {
         VStack(spacing: 16) {
-            Text("獲得経験値")
+            // 保存ボタン
+            Button(action: {
+                saveRecord()
+            }) {
+                HStack {
+                    Image(systemName: "checkmark.circle.fill")
+                    Text("調理記録を保存")
+                }
                 .font(.headline)
                 .fontWeight(.semibold)
-            
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("基本経験値")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    
-                    Text("+\(experienceGained) XP")
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.brown)
-                }
-                
-                Spacer()
-                
-                if leveledUp {
-                    VStack(alignment: .trailing, spacing: 4) {
-                        Text("レベルアップ！")
-                            .font(.caption)
-                            .foregroundColor(.orange)
-                        
-                        Text("Lv.\(newLevel)")
-                            .font(.title3)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.orange)
-                    }
-                }
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 16)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.brown)
+                )
             }
             
-            if let user = user {
-                VStack(spacing: 8) {
-                    HStack {
-                        Text("現在のレベル: \(Int(user.level))")
-                        Spacer()
-                        Text("経験値: \(Int(user.experiencePoints)) XP")
-                    }
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    
-                    ProgressView(value: user.progressToNextLevel, total: 1.0)
-                        .progressViewStyle(LinearProgressViewStyle(tint: .brown))
-                        .scaleEffect(x: 1, y: 2, anchor: .center)
-                }
+            // 後で保存ボタン
+            Button(action: {
+                dismiss()
+            }) {
+                Text("後で保存")
+                    .font(.subheadline)
+                    .foregroundColor(.brown)
             }
         }
         .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.brown.opacity(0.05))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.brown.opacity(0.3), lineWidth: 1)
-                )
-        )
     }
     
     // MARK: - Methods
     
-    /// 選択した写真を読み込み
-    private func loadSelectedPhotos() {
-        Task {
-            for item in selectedPhotos {
-                if let data = try? await item.loadTransferable(type: Data.self),
-                   let image = UIImage(data: data) {
-                    await MainActor.run {
-                        photoImages.append(image)
-                    }
-                }
-            }
-            await MainActor.run {
-                selectedPhotos.removeAll()
-            }
+    /// 調理記録を保存して経験値アニメーションを表示
+    private func saveRecord() {
+        print("💾 CookingCompletionView: saveRecord開始")
+        print("💾 CookingCompletionView: user = \(user != nil ? "存在" : "nil")")
+        
+        guard let user = user else {
+            print("⚠️ CookingCompletionView: userがnilのため直接保存")
+            // ユーザーがいない場合は直接保存
+            onComplete(createFinalCookingRecord())
+            dismiss()
+            return
         }
-    }
-    
-    /// 基本記録のみ保存（写真・メモなし）
-    private func saveBasicRecord() {
-        let record = createCookingRecord()
-        onComplete(record)
+        
+        // 経験値計算（拡張ボーナス含む）
+        let oldLevel = Int(user.level)
+        
+        // 時間精度ボーナス計算
+        let timePrecisionBonus = ExperienceService.shared.calculateTimePrecisionBonus(
+            estimatedTimeInMinutes: Int(recipe.estimatedTimeInMinutes),
+            actualTimeInMinutes: cookingRecord.actualMinutes
+        )
+        
+        // 連続調理ボーナス計算
+        let consecutiveBonus = ExperienceService.shared.calculateConsecutiveCookingBonus(context: viewContext)
+        
+        // 基本経験値計算
+        let baseExperience = ExperienceService.shared.calculateExperience(
+            for: recipe,
+            hasPhotos: !photoImages.isEmpty,
+            hasNotes: !notes.isEmpty
+        )
+        
+        // 追加の難易度ボーナス（星4-5のみ）
+        let difficultyBonus = ExperienceService.shared.calculateDifficultyBonus(difficulty: Int(recipe.difficulty))
+        
+        // 合計経験値
+        let experienceGained = baseExperience + timePrecisionBonus + consecutiveBonus + difficultyBonus
+        
+        print("💾 CookingCompletionView: 経験値詳細 - 基本: \(baseExperience), 時間精度: \(timePrecisionBonus), 連続: \(consecutiveBonus), 難易度: \(difficultyBonus), 合計: \(experienceGained)")
+        
+        // 経験値付与とレベルアップ判定
+        let didLevelUp = user.addExperience(Int32(experienceGained))
+        let newLevel = Int(user.level)
+        
+        print("💾 CookingCompletionView: 経験値付与完了 - レベルアップ: \(didLevelUp), 新レベル: \(newLevel)")
+        
+        // Core Data保存
+        PersistenceController.shared.save()
+        
+        print("💾 CookingCompletionView: 経験値処理完了 - 獲得: \(experienceGained), レベルアップ: \(didLevelUp)")
+        
+        // 経験値獲得通知をトリガー
+        ExperienceNotificationManager.shared.triggerExperienceNotification(
+            gained: experienceGained,
+            levelUp: didLevelUp,
+            oldLv: oldLevel,
+            newLv: newLevel
+        )
+        
+        // 調理記録を保存して直接完了
+        onComplete(createFinalCookingRecord())
         dismiss()
     }
     
-    /// 完全な記録を保存（写真・メモ含む）
-    private func saveCompletionRecord() {
-        let record = createCookingRecord()
-        
-        // 写真を保存（実装簡略化のため、パスのみ保存）
-        if !photoImages.isEmpty {
-            let photoPaths = savePhotos()
-            record.photoPaths = photoPaths as NSObject
-        }
-        
-        // メモを保存
-        if !notes.isEmpty {
-            record.notes = notes
-        }
-        
-        // 経験値を追加
-        if let user = user {
-            let didLevelUp = user.addExperience(Int32(experienceGained))
-            if didLevelUp {
-                leveledUp = true
-                newLevel = Int(user.level)
-                // レベルアップアニメーション表示
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    isShowingLevelUpAnimation = true
-                }
-            }
-        }
-        
-        PersistenceController.shared.save()
-        onComplete(record)
-        
-        // アニメーション表示されない場合は即座に閉じる
-        if !leveledUp {
-            dismiss()
-        } else {
-            // レベルアップアニメーション後に閉じる
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                dismiss()
-            }
-        }
-    }
-    
-    /// CookingRecord作成
-    private func createCookingRecord() -> CookingRecord {
+    /// 最終的なCookingRecord作成
+    private func createFinalCookingRecord() -> CookingRecord {
         let record = CookingRecord(context: viewContext)
         record.id = UUID()
+        record.recipe = recipe
         record.recipeId = recipe.id
         record.cookingTimeInMinutes = Int32(cookingRecord.actualMinutes)
-        record.experienceGained = Int32(experienceGained)
-        record.cookedAt = Date()
-        record.recipe = recipe
+        // 拡張経験値計算（調理完了時と同じ計算）
+        let baseExp = ExperienceService.shared.calculateExperience(
+            for: recipe,
+            hasPhotos: !photoImages.isEmpty,
+            hasNotes: !notes.isEmpty
+        )
+        let timePrecisionExp = ExperienceService.shared.calculateTimePrecisionBonus(
+            estimatedTimeInMinutes: Int(recipe.estimatedTimeInMinutes),
+            actualTimeInMinutes: cookingRecord.actualMinutes
+        )
+        let consecutiveExp = ExperienceService.shared.calculateConsecutiveCookingBonus(context: viewContext)
+        let difficultyExp = ExperienceService.shared.calculateDifficultyBonus(difficulty: Int(recipe.difficulty))
+        
+        record.experienceGained = Int32(baseExp + timePrecisionExp + consecutiveExp + difficultyExp)
+        record.cookedAt = cookingRecord.endTime
+        record.notes = notes.isEmpty ? nil : notes
+        record.photoPaths = savePhotoImages() as NSObject
+        
         return record
     }
     
-    /// 写真保存処理
-    private func savePhotos() -> [String] {
+    /// 写真を保存してパスを返す
+    private func savePhotoImages() -> [String] {
         var photoPaths: [String] = []
         
-        for (index, uiImage) in photoImages.enumerated() {
-            let imageName = "\(recipe.id?.uuidString ?? "unknown")_\(index)_\(Date().timeIntervalSince1970).jpg"
-            
-            if let imageData = uiImage.jpegData(compressionQuality: 0.8) {
-                let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-                let imageURL = documentsDirectory.appendingPathComponent(imageName)
+        for (index, image) in photoImages.enumerated() {
+            let fileName = "\(UUID().uuidString)_\(index).jpg"
+            if let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+                let fileURL = documentsDirectory.appendingPathComponent(fileName)
                 
-                do {
-                    try imageData.write(to: imageURL)
-                    photoPaths.append(imageName)
-                    AppLogger.success("画像保存成功: \(imageName)")
-                } catch {
-                    AppLogger.error("画像保存エラー", error: error)
+                if let imageData = image.jpegData(compressionQuality: 0.8) {
+                    try? imageData.write(to: fileURL)
+                    photoPaths.append(fileName)
                 }
-            } else {
-                AppLogger.error("画像データ変換エラー")
             }
         }
         
         return photoPaths
     }
     
-}
-
-// MARK: - Camera View
-struct CameraView: UIViewControllerRepresentable {
-    let onImageCaptured: (UIImage) -> Void
-    @Environment(\.dismiss) private var dismiss
+    /// 経験値の初期表示を設定
+    // 旧メソッドは新しいsaveRecordメソッドに置き換えられました
     
-    func makeUIViewController(context: Context) -> UIImagePickerController {
-        let picker = UIImagePickerController()
-        picker.sourceType = .camera
-        picker.delegate = context.coordinator
-        return picker
-    }
-    
-    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
-    
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self)
-    }
-    
-    class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-        let parent: CameraView
-        
-        init(_ parent: CameraView) {
-            self.parent = parent
-        }
-        
-        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-            if let image = info[.originalImage] as? UIImage {
-                parent.onImageCaptured(image)
-            }
-            parent.dismiss()
-        }
-        
-        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-            parent.dismiss()
-        }
-    }
-}
-
-// MARK: - Level Up Animation View
-struct LevelUpAnimationView: View {
-    let newLevel: Int
-    let onComplete: () -> Void
-    
-    @State private var scale: CGFloat = 0.1
-    @State private var opacity: Double = 0
-    @State private var sparkleRotation: Double = 0
-    
-    var body: some View {
-        ZStack {
-            // 背景
-            Color.black.opacity(0.7)
-                .ignoresSafeArea()
-            
-            VStack(spacing: 20) {
-                // レベルアップテキスト
-                Text("LEVEL UP!")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .foregroundColor(.orange)
-                    .scaleEffect(scale)
-                    .opacity(opacity)
-                
-                // 新しいレベル表示
-                VStack(spacing: 8) {
-                    Text("レベル")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                    
-                    Text("\(newLevel)")
-                        .font(.system(size: 80, weight: .bold))
-                        .foregroundColor(.orange)
-                        .scaleEffect(scale)
-                        .opacity(opacity)
-                }
-                
-                // キラキラエフェクト
-                Image(systemName: "sparkles")
-                    .font(.system(size: 40))
-                    .foregroundColor(.yellow)
-                    .rotationEffect(.degrees(sparkleRotation))
-                    .opacity(opacity)
-            }
-        }
-        .onAppear {
-            withAnimation(.spring(response: 0.8, dampingFraction: 0.6)) {
-                scale = 1.0
-                opacity = 1.0
-            }
-            
-            withAnimation(.linear(duration: 2).repeatForever(autoreverses: false)) {
-                sparkleRotation = 360
-            }
-            
-            // 3秒後に自動で完了
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                withAnimation(.easeOut(duration: 0.5)) {
-                    opacity = 0
-                    scale = 1.2
-                }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    onComplete()
-                }
-            }
-        }
-    }
 }
 
 // MARK: - Preview
