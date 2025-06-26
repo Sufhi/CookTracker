@@ -23,7 +23,7 @@ struct ContentView: View {
                 }
             
             // レシピ一覧
-            RecipeListView(context: viewContext)
+            RecipeListView()
                 .tabItem {
                     Image(systemName: "book.fill")
                     Text("レシピ")

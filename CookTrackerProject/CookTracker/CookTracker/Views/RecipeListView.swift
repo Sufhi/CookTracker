@@ -9,13 +9,9 @@ struct RecipeListView: View {
     
     // MARK: - Properties
     @Environment(\.managedObjectContext) private var viewContext
-    @StateObject private var viewModel: RecipeListViewModel
+    @StateObject private var viewModel = RecipeListViewModel()
     @State private var isShowingAddRecipe = false
     @State private var selectedRecipe: Recipe? = nil
-    
-    init(context: NSManagedObjectContext) {
-        _viewModel = StateObject(wrappedValue: RecipeListViewModel(context: context))
-    }
     
     // MARK: - Body
     var body: some View {
@@ -78,6 +74,6 @@ struct RecipeListView: View {
 // MARK: - Preview
 struct RecipeListView_Previews: PreviewProvider {
     static var previews: some View {
-        RecipeListView(context: PersistenceController.preview.container.viewContext)
+        RecipeListView()
     }
 }
