@@ -65,7 +65,7 @@ struct CoreDataRecipeDetailView: View {
                                     .foregroundColor(.white)
                                 
                                 // テキスト
-                                Text("調理を開始する")
+                                Text("作ってみる")
                                     .font(.headline)
                                     .fontWeight(.semibold)
                                     .foregroundColor(.white)
@@ -133,8 +133,9 @@ struct CoreDataRecipeDetailView: View {
                             .font(.headline)
                             .fontWeight(.semibold)
                         
-                        Text(recipe.ingredients ?? "材料なし")
+                        Text(recipe.ingredients ?? "材料を登録してみよう！")
                             .font(.body)
+                            .foregroundColor(recipe.ingredients == nil ? .secondary : .primary)
                     }
                     
                     Divider()
@@ -145,8 +146,9 @@ struct CoreDataRecipeDetailView: View {
                             .font(.headline)
                             .fontWeight(.semibold)
                         
-                        Text(recipe.instructions ?? "手順なし")
+                        Text(recipe.instructions ?? "作り方を登録してみよう！")
                             .font(.body)
+                            .foregroundColor(recipe.instructions == nil ? .secondary : .primary)
                     }
                     
                     // URL（ある場合）
@@ -184,7 +186,7 @@ struct CoreDataRecipeDetailView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("閉じる") {
+                    Button("とじる") {
                         dismiss()
                     }
                 }

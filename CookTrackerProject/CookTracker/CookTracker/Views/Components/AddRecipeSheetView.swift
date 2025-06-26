@@ -31,7 +31,7 @@ struct AddRecipeSheetView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("キャンセル") {
+                    Button("やめる") {
                         dismiss()
                     }
                 }

@@ -50,7 +50,7 @@ struct CookingTimerView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("閉じる") {
+                    Button("とじる") {
                         // タイマーは継続したまま画面を閉じる
                         dismiss()
                     }
@@ -266,7 +266,7 @@ struct TimePickerView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("キャンセル") {
+                    Button("やめる") {
                         dismiss()
                     }
                 }
@@ -339,7 +339,7 @@ struct TimerCompletionView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("閉じる") {
+                    Button("とじる") {
                         onDismiss()
                         dismiss()
                     }

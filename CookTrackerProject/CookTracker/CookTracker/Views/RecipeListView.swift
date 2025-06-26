@@ -33,7 +33,7 @@ struct RecipeListView: View {
                     Button(action: {
                         isShowingAddRecipe = true
                     }) {
-                        Image(systemName: "plus")
+                        Text("レシピを追加")
                             .foregroundColor(.brown)
                     }
                 }

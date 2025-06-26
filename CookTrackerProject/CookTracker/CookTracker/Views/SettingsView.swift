@@ -166,7 +166,7 @@ struct SettingsView: View {
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("閉じる") {
+                    Button("とじる") {
                         dismiss()
                     }
                 }
@@ -190,7 +190,7 @@ struct SettingsView: View {
         .alert("メール送信エラー", isPresented: $showingMailError) {
             Button("OK") { }
         } message: {
-            Text("お使いのデバイスでメール送信が設定されていません。")
+            Text("メール設定がされてないみたい。端末の設定アプリから確認できるよ。")
         }
     }
     

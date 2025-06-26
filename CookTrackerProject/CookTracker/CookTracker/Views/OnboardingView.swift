@@ -79,7 +79,7 @@ struct OnboardingView: View {
                                     .font(.title3)
                                     .foregroundColor(isAgreed ? .brown : .gray)
                                 
-                                Text("利用規約とプライバシーポリシーに同意します")
+                                Text("利用規約とプライバシーポリシーに同意する")
                                     .font(.subheadline)
                                     .foregroundColor(.primary)
                             }
@@ -94,7 +94,7 @@ struct OnboardingView: View {
                     Button(action: {
                         hasAcceptedTerms = true
                     }) {
-                        Text("CookTrackerを始める")
+                        Text("はじめる！")
                             .font(.headline)
                             .fontWeight(.semibold)
                             .foregroundColor(.white)

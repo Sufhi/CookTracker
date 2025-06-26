@@ -116,9 +116,10 @@ struct SimpleHomeView: View {
                             VStack(spacing: 8) {
                                 let cookingRecords = Array(recentCookingRecords)
                                 if cookingRecords.isEmpty {
-                                    Text("まだ調理記録がありません")
+                                    Text("まだ料理の記録がないよ〜\n最初の一品を作ってみよう！")
                                         .font(.subheadline)
                                         .foregroundColor(.secondary)
+                                        .multilineTextAlignment(.center)
                                         .padding()
                                 } else {
                                     ForEach(Array(cookingRecords.prefix(3)), id: \.id) { record in

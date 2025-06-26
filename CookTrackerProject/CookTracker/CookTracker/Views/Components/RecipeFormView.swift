@@ -86,7 +86,7 @@ struct RecipeFormView: View {
                 }
                 
                 Section {
-                    Button(isEditMode ? "変更を保存" : "レシピを追加") {
+                    Button(isEditMode ? "これでOK！" : "この内容で登録！") {
                         saveRecipe()
                     }
                     .disabled(title.isEmpty || ingredients.isEmpty)
@@ -96,7 +96,7 @@ struct RecipeFormView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("キャンセル") {
+                    Button("やめる") {
                         dismiss()
                     }
                 }

@@ -34,7 +34,7 @@ extension Recipe {
     
     /// レシピの作成日フォーマット
     var formattedCreatedDate: String {
-        guard let date = createdAt else { return "不明" }
+        guard let date = createdAt else { return "？" }
         let formatter = DateFormatter()
         formatter.dateFormat = "MM/dd"
         return formatter.string(from: date)
@@ -42,7 +42,7 @@ extension Recipe {
     
     /// レシピの更新日フォーマット
     var formattedUpdatedDate: String {
-        guard let date = updatedAt else { return "不明" }
+        guard let date = updatedAt else { return "？" }
         let formatter = DateFormatter()
         formatter.dateFormat = "MM/dd HH:mm"
         return formatter.string(from: date)

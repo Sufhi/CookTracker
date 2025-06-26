@@ -17,11 +17,11 @@ struct EmptyRecipeView: View {
                 .font(.system(size: 60))
                 .foregroundColor(.brown.opacity(0.5))
             
-            Text("レシピが見つかりません")
+            Text("レシピがないよ")
                 .font(.title3)
                 .fontWeight(.medium)
             
-            Text("新しいレシピを追加してください")
+            Text("新しいレシピを追加してみよう")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
             

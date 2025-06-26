@@ -148,7 +148,7 @@ struct HistoryStatsView: View {
                 .font(.title3)
                 .fontWeight(.medium)
             
-            Text("料理を作って記録を残しましょう！")
+                                        Text("最初の料理を記録してみよう！")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)

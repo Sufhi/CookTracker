@@ -22,7 +22,7 @@ extension CookingRecord {
     }
     /// フォーマットされた調理日時（詳細版）
     var formattedDetailedDate: String {
-        guard let date = cookedAt else { return "不明" }
+        guard let date = cookedAt else { return "？" }
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy年MM月dd日 HH:mm"
         return formatter.string(from: date)
@@ -30,7 +30,7 @@ extension CookingRecord {
     
     /// フォーマットされた調理日時（短縮版）
     var formattedShortDate: String {
-        guard let date = cookedAt else { return "不明" }
+        guard let date = cookedAt else { return "？" }
         let formatter = DateFormatter()
         formatter.dateFormat = "MM/dd HH:mm"
         return formatter.string(from: date)

@@ -50,11 +50,7 @@ struct CookingCompletionView: View {
             .navigationTitle("調理完了")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("後で") {
-                        dismiss()
-                    }
-                }
+                
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("保存") {
@@ -156,7 +152,7 @@ struct CookingCompletionView: View {
                         .stroke(Color.gray.opacity(0.3), lineWidth: 1)
                 )
             
-            Text("次回作るときの参考になるメモを記録してください")
+            Text("次に作るときのメモがあれば書いておこう")
                 .font(.caption)
                 .foregroundColor(.secondary)
         }
@@ -177,7 +173,7 @@ struct CookingCompletionView: View {
             }) {
                 HStack {
                     Image(systemName: "checkmark.circle.fill")
-                    Text("調理記録を保存")
+                    Text("記録して経験値GET！")
                 }
                 .font(.headline)
                 .fontWeight(.semibold)
@@ -190,14 +186,7 @@ struct CookingCompletionView: View {
                 )
             }
             
-            // 後で保存ボタン
-            Button(action: {
-                dismiss()
-            }) {
-                Text("後で保存")
-                    .font(.subheadline)
-                    .foregroundColor(.brown)
-            }
+            
         }
         .padding()
     }

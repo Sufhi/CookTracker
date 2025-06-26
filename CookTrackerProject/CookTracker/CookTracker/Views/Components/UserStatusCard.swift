@@ -146,7 +146,7 @@ extension UserStatusCard {
                     StatCard(
                         icon: "calendar",
                         iconColor: .brown,
-                        title: "連続記録",
+                        title: "連続クッキング",
                         value: "\(CookingStats.currentStreakDays(from: cookingRecords))",
                         subtitle: "日"
                     )

@@ -83,22 +83,22 @@ struct CookingSessionView: View {
                     CookingTimerView(timer: CookingTimer())
                 }
             }
-            .alert("調理を完了しますか？", isPresented: $isShowingFinishConfirmation) {
-                Button("完了", role: .destructive) {
+            .alert("できあがった？", isPresented: $isShowingFinishConfirmation) {
+                Button("完成！", role: .destructive) {
                     handleCookingCompletion()
                 }
-                Button("キャンセル", role: .cancel) { }
+                Button("まだ", role: .cancel) { }
             } message: {
-                Text("経過時間: \(cookingSession.formattedElapsedTime)\n\n完了後は調理記録として保存されます。")
+                Text("経過時間: \(cookingSession.formattedElapsedTime)\n\n記録に残るよ！")
             }
-            .alert("調理をキャンセルしますか？", isPresented: $isShowingCancelConfirmation) {
-                Button("キャンセル", role: .destructive) {
+            .alert("やっぱりやめる？", isPresented: $isShowingCancelConfirmation) {
+                Button("やめる", role: .destructive) {
                     cookingSession.cancelCooking()
                     dismiss()
                 }
-                Button("続行", role: .cancel) { }
+                Button("つづける", role: .cancel) { }
             } message: {
-                Text("経過時間: \(cookingSession.formattedElapsedTime)\n\n調理をキャンセルすると、これまでの記録は保存されません。")
+                Text("経過時間: \(cookingSession.formattedElapsedTime)\n\n記録は残らないよ")
             }
             .fullScreenCover(isPresented: $isShowingCompletionAnimation) {
                 Group {
@@ -357,7 +357,7 @@ struct CookingSessionView: View {
                 }) {
                     HStack {
                         Image(systemName: cookingSession.isRunning ? "pause.fill" : "play.fill")
-                        Text(cookingSession.isRunning ? "一時停止" : "再開")
+                                                        Text(cookingSession.isRunning ? "ちょっと待って" : "つづける")
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
@@ -408,7 +408,7 @@ struct CookingSessionView: View {
         if !cookingSession.isRunning && !cookingSession.isPaused {
             return "調理開始"
         } else {
-            return "調理完了"
+            return "できた！ 🎉"
         }
     }
     

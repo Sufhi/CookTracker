@@ -42,7 +42,7 @@ struct CookingRecordDetailView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("閉じる") {
+                    Button("とじる") {
                         dismiss()
                     }
                 }
@@ -506,7 +506,7 @@ struct PhotoGalleryView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("閉じる") {
+                    Button("とじる") {
                         dismiss()
                     }
                 }

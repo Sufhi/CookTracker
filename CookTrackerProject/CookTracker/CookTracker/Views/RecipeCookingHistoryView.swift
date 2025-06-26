@@ -56,7 +56,7 @@ struct RecipeCookingHistoryView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("閉じる") {
+                    Button("とじる") {
                         dismiss()
                     }
                 }
@@ -243,17 +243,17 @@ struct RecipeCookingHistoryView: View {
                 .foregroundColor(.brown.opacity(0.5))
             
             VStack(spacing: 8) {
-                Text("まだ調理記録がありません")
+                Text("まだ作ったことがないよ")
                     .font(.title3)
                     .fontWeight(.medium)
                 
-                Text("\(recipe.title ?? "このレシピ")を調理して\n最初の記録を作成しましょう！")
+                Text("\(recipe.title ?? "このレシピ")を作って\n最初の記録を残してみよう！")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
             }
             
-            Button("調理を開始") {
+            Button("作ってみる") {
                 let _ = sessionManager.startCookingSession(for: recipe)
                 isShowingCookingSession = true
             }
